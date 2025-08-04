@@ -61,8 +61,125 @@ function parseDocument($: cheerio.Root): DocumentSection[] {
   }
 
   const menuItems = parseMenuList($, navUl, 1);
+  
+  // Step 1: Flatten the menuItems list
+  const flattenedItems = flattenMenuItems(menuItems);
+  
+  // Step 2: Extract content between sections and reconstruct nested structure
+  return reconstructDocumentSections($, flattenedItems);
+}
 
-  return convertMenuToDocumentStructure($, menuItems);
+function flattenMenuItems(menuItems: MenuItem[]): MenuItem[] {
+  const flattened: MenuItem[] = [];
+  
+  function flattenRecursive(items: MenuItem[]) {
+    for (const item of items) {
+      // Add the current item (without subsections)
+      const flatItem: MenuItem = {
+        name: item.name,
+        type: item.type,
+        id: item.id,
+        subsections: []
+      };
+      flattened.push(flatItem);
+      
+      // Recursively flatten subsections
+      if (item.subsections.length > 0) {
+        flattenRecursive(item.subsections);
+      }
+    }
+  }
+  
+  flattenRecursive(menuItems);
+  return flattened;
+}
+
+function reconstructDocumentSections($: cheerio.Root, flattenedItems: MenuItem[]): DocumentSection[] {
+  const documentSections: DocumentSection[] = [];
+  
+  for (let i = 0; i < flattenedItems.length; i++) {
+    const currentItem = flattenedItems[i];
+    const nextItem = flattenedItems[i + 1];
+    
+    // Create the current section
+    const section: DocumentSection = {
+      name: currentItem.name,
+      type: currentItem.type,
+      id: currentItem.id,
+      subsections: []
+    };
+    
+    // Extract content between current item and next item
+    if (currentItem.id) {
+      const contentBetween = extractContentBetweenSections($, currentItem.id, nextItem?.id);
+      if (contentBetween.length > 0) {
+        section.subsections.push(...contentBetween);
+      }
+    }
+    
+    documentSections.push(section);
+  }
+  
+  return documentSections;
+}
+
+function extractContentBetweenSections($: cheerio.Root, currentId: string, nextId?: string): RawElement[] {
+  const rawElements: RawElement[] = [];
+  let collecting = false;
+  const betweenNodes: cheerio.Element[] = [];
+  
+  function walk(node: cheerio.Element) {
+    if (!node) return;
+    
+    // Check if this is a tag element with attributes
+    if (node.type === 'tag' && 'attribs' in node) {
+      const tagNode = node as cheerio.TagElement;
+      
+      // Start collecting after current section
+      if (tagNode.attribs?.id === currentId) {
+        collecting = true;
+        return;
+      }
+      
+      // Stop collecting before next section
+      if (nextId && tagNode.attribs?.id === nextId) {
+        collecting = false;
+        return;
+      }
+    }
+    
+    if (collecting) {
+      betweenNodes.push(node);
+    }
+    
+    // Recurse into children
+    if ('children' in node && node.children) {
+      for (let child of node.children) {
+        if (child.type === 'tag') {
+          walk(child);
+        }
+      }
+    }
+  }
+  
+  // Start walking from the body
+  const body = $('body')[0];
+  if (body) {
+    walk(body);
+  }
+  
+  // Convert collected nodes to RawElements
+  for (const node of betweenNodes) {
+    const html = $.html(node);
+    if (html && html.trim()) {
+      rawElements.push({
+        type: 'raw',
+        content: html
+      });
+    }
+  }
+  
+  return rawElements;
 }
 
 function parseMenuList($: cheerio.Root, $ul: cheerio.Cheerio, level: number): MenuItem[] {
@@ -99,148 +216,6 @@ function parseMenuList($: cheerio.Root, $ul: cheerio.Cheerio, level: number): Me
   
   return menuItems;
 }
-
-function convertMenuToDocumentStructure($: cheerio.Root, menuItems: MenuItem[]): DocumentSection[] {
-  // Find all content elements in the document
-  const contentSection = $('#contenu');
-  if (!contentSection.length) {
-    return convertMenuItemsToDocumentSections(menuItems);
-  }
-
-  // Get all elements in the content section, but be more selective to avoid duplicates
-  // We'll get elements that either have IDs or are text-containing elements
-  const allContentElements = contentSection.children()
-  
-  // Create a flat list of all menu items with their IDs for quick lookup
-  const menuItemMap = new Map<string, MenuItem>();
-  function addMenuItemsToMap(items: MenuItem[]) {
-    items.forEach(item => {
-      if (item.id) {
-        menuItemMap.set(item.id, item);
-      }
-      if (item.subsections.length > 0) {
-        addMenuItemsToMap(item.subsections);
-      }
-    });
-  }
-  addMenuItemsToMap(menuItems);
-  
-  // Sequential parsing of the document
-  return parseDocumentSequentially($, menuItems, allContentElements, menuItemMap);
-}
-
-function parseDocumentSequentially(
-  $: cheerio.Root, 
-  menuItems: MenuItem[], 
-  contentElements: cheerio.Cheerio, 
-  menuItemMap: Map<string, MenuItem>
-): DocumentSection[] {
-  
-  // Initialize document sections with empty subsections
-  const documentSections = convertMenuItemsToDocumentSections(menuItems);
-  
-  // Create a map to track current section for each level
-  const currentSections: DocumentSection[] = [];
-  
-  // Process each content element sequentially
-  contentElements.each((_, element) => {
-    const $element = $(element);
-    const elementId = $element.attr('id');
-    const elementText = $element.text().trim();
-    
-    if (!elementText) return; // Skip empty elements
-    
-    if (elementId && menuItemMap.has(elementId)) {
-      // This element matches a menu item - update current section
-      const matchingMenuItem = menuItemMap.get(elementId)!;
-      updateCurrentSection(matchingMenuItem, documentSections, currentSections);
-    } else {
-      // This is raw content - add it to the current section
-      const rawElement: RawElement = {
-        type: 'raw',
-        content: elementText
-      };
-      
-      if (currentSections.length > 0) {
-        // Add to the deepest current section
-        const deepestSection = currentSections[currentSections.length - 1];
-        deepestSection.subsections.push(rawElement);
-      }
-    }
-  });
-  
-  return documentSections;
-}
-
-function updateCurrentSection(
-  menuItem: MenuItem, 
-  documentSections: DocumentSection[], 
-  currentSections: DocumentSection[]
-): void {
-  // Find the corresponding document section
-  const documentSection = findDocumentSection(menuItem, documentSections);
-  if (!documentSection) return;
-  
-  // Update current sections based on the level
-  const level = parseInt(menuItem.type.replace('level', ''));
-  
-  // Remove deeper levels
-  while (currentSections.length >= level) {
-    currentSections.pop();
-  }
-  
-  // Add this section
-  currentSections.push(documentSection);
-}
-
-function findDocumentSection(menuItem: MenuItem, documentSections: DocumentSection[]): DocumentSection | null {
-  for (const section of documentSections) {
-    if (section.id === menuItem.id) {
-      return section;
-    }
-    if (section.subsections.length > 0) {
-      const found = findDocumentSectionInSubsections(menuItem, section.subsections);
-      if (found) return found;
-    }
-  }
-  return null;
-}
-
-function findDocumentSectionInSubsections(
-  menuItem: MenuItem, 
-  subsections: (DocumentSection | RawElement)[]
-): DocumentSection | null {
-  for (const subsection of subsections) {
-    if (subsection.type === 'raw') continue;
-    
-    const docSection = subsection as DocumentSection;
-    if (docSection.id === menuItem.id) {
-      return docSection;
-    }
-    if (docSection.subsections.length > 0) {
-      const found = findDocumentSectionInSubsections(menuItem, docSection.subsections);
-      if (found) return found;
-    }
-  }
-  return null;
-}
-
-function convertMenuItemsToDocumentSections(menuItems: MenuItem[]): DocumentSection[] {
-  return menuItems.map(menuItem => {
-    const documentSection: DocumentSection = {
-      name: menuItem.name,
-      type: menuItem.type,
-      id: menuItem.id,
-      subsections: menuItem.subsections.length > 0 
-        ? convertMenuItemsToDocumentSections(menuItem.subsections)
-        : []
-    };
-    
-    return documentSection;
-  });
-}
-
-
 
 // Run if this file is executed directly
 if (require.main === module) {
