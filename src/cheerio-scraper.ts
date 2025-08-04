@@ -6,7 +6,7 @@ import * as path from 'path';
 
 // Example usage
 async function main() {
-  const filePath = './manuel-specialistes-remuneration-acte.html';
+  const filePath = './src/manuel-specialistes-remuneration-acte.html';
 
   try {
     console.log('=== STARTING SCRAPER ===');
@@ -168,18 +168,91 @@ function extractContentBetweenSections($: cheerio.Root, currentId: string, nextI
     walk(body);
   }
   
-  // Convert collected nodes to RawElements
-  for (const node of betweenNodes) {
-    const html = $.html(node);
-    if (html && html.trim()) {
-      rawElements.push({
-        type: 'raw',
-        content: html
-      });
+  // Group nodes by their parent to keep complete elements intact
+  const groupedElements = groupNodesByParent($, betweenNodes);
+  
+  // Convert grouped elements to RawElements
+  for (const group of groupedElements) {
+    if (group.length > 0) {
+      // Create a temporary container to hold all elements in the group
+      const container = $('<div>');
+      for (const node of group) {
+        container.append($.html(node));
+      }
+      const html = container.html();
+      if (html && html.trim()) {
+        rawElements.push({
+          type: 'raw',
+          content: html
+        });
+      }
     }
   }
   
   return rawElements;
+}
+
+function groupNodesByParent($: cheerio.Root, nodes: cheerio.Element[]): cheerio.Element[][] {
+  if (nodes.length === 0) return [];
+  
+  const groups: cheerio.Element[][] = [];
+  const processedNodes = new Set<cheerio.Element>();
+  
+  for (const node of nodes) {
+    if (processedNodes.has(node)) continue;
+    
+    const group: cheerio.Element[] = [];
+    const parent = findTopLevelParent($, node, nodes);
+    
+    // Collect all nodes that belong to the same top-level parent
+    for (const otherNode of nodes) {
+      if (!processedNodes.has(otherNode) && isDescendantOf($, otherNode, parent)) {
+        group.push(otherNode);
+        processedNodes.add(otherNode);
+      }
+    }
+    
+    if (group.length > 0) {
+      groups.push(group);
+    }
+  }
+  
+  return groups;
+}
+
+function findTopLevelParent($: cheerio.Root, node: cheerio.Element, allNodes: cheerio.Element[]): cheerio.Element {
+  let current = node;
+  
+  while (current.parent && current.parent.type === 'tag') {
+    const parent = current.parent as cheerio.Element;
+    
+    // Check if this parent contains any of our target nodes
+    const hasTargetNodes = allNodes.some(targetNode => 
+      targetNode !== node && isDescendantOf($, targetNode, parent)
+    );
+    
+    // If parent contains other target nodes, this is not the top-level parent
+    if (hasTargetNodes) {
+      current = parent;
+    } else {
+      break;
+    }
+  }
+  
+  return current;
+}
+
+function isDescendantOf($: cheerio.Root, node: cheerio.Element, ancestor: cheerio.Element): boolean {
+  let current = node.parent;
+  
+  while (current && current.type === 'tag') {
+    if (current === ancestor) {
+      return true;
+    }
+    current = current.parent;
+  }
+  
+  return false;
 }
 
 function parseMenuList($: cheerio.Root, $ul: cheerio.Cheerio, level: number): MenuItem[] {
