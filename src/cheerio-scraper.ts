@@ -38,8 +38,6 @@ async function main() {
     const $ = cheerio.load(htmlContent);
 
     const document = parseDocument($);
-    console.log('Menu Structure parsed successfully');
-    console.log('Menu Structure:', JSON.stringify(document, null, 2));
     
     // Test: Compare original content with extracted content
     testContentCompleteness($, document);
@@ -190,52 +188,81 @@ function reconstructDocumentSections($: cheerio.Root, flattenedItems: MenuItem[]
 
 function extractContentBetweenSections($: cheerio.Root, currentId: string, nextId?: string): RawElement[] {
   const rawElements: RawElement[] = [];
-
+  
   // Find the current section element
   const currentSection = $(`[id="${currentId}"]`);
   if (currentSection.length === 0) return rawElements;
-
+  
   // Get the parent container that holds both sections
   const parent = currentSection.parent();
   if (parent.length === 0) return rawElements;
-
+  
   // Get all elements between current section and next section
   let currentElement = currentSection.next();
   const collectedElements: cheerio.Element[] = [];
-
+  
   while (currentElement.length > 0) {
     // Stop if we reach the next section
     if (nextId && currentElement.attr('id') === nextId) {
       break;
     }
+    
+    // Check if this element contains the next section
+    const containsNextSection = nextId ? currentElement.find(`[id="${nextId}"]`).length > 0 : false;
+    
+    if (containsNextSection) {
+      // If this element contains the next section, we need to dig deeper
+      // but only collect elements that come before the next section
+      const nextSectionInElement = currentElement.find(`[id="${nextId}"]`).first();
+      let childElement = currentElement.children().first();
+      
+      while (childElement.length > 0 && childElement[0] !== nextSectionInElement[0]) {
+        const html = $.html(childElement);
+        const text = childElement.text().trim();
+        
+        if (html && html.trim() && text.length) {
+          collectedElements.push(childElement[0]);
+        }
+        childElement = childElement.next();
+      }
+    } else {
+      const html = $.html(currentElement);
+      const text = currentElement.text().trim();
 
-    // Collect all elements, not just substantial ones, to capture complete content
-    const html = $.html(currentElement);
-    if (html && html.trim()) {
-      collectedElements.push(currentElement[0]);
+      if (html && html.trim() && text.length ) {
+        collectedElements.push(currentElement[0]);
+      }
     }
-
+    
     currentElement = currentElement.next();
   }
-
+  
   // Remove duplicates using a more aggressive approach
   const uniqueElements = removeDuplicateNodes(collectedElements);
-
-  // Convert to RawElements, but limit the number to avoid massive duplication
-  let count = 0;
+  
+  // Convert to RawElements, but be more selective about content
   for (const element of uniqueElements) {
-    if (count >= 50) break; // Limit to prevent massive output
-
     const html = $.html(element);
-    if (html && html.trim()) {
-      rawElements.push({
-        type: 'raw',
-        content: html
-      });
-      count++;
+    const text = $(element).text().trim();
+    
+    // Only include elements with substantial content and avoid very repetitive content
+    if (html && html.trim() && text.length > 10) {
+      // Additional filtering: check for repetitive patterns
+      const normalizedText = text.replace(/\s+/g, ' ').trim().toLowerCase();
+      const words = normalizedText.split(/\s+/);
+      const uniqueWords = new Set(words);
+      const repetitionRatio = uniqueWords.size / words.length;
+      
+      // Only include if it's not too repetitive or if it's substantial content
+      if (repetitionRatio > 0.3 || words.length > 20) {
+        rawElements.push({
+          type: 'raw',
+          content: html
+        });
+      }
     }
   }
-
+  
   return rawElements;
 }
 
@@ -251,16 +278,30 @@ function removeDuplicateNodes(nodes: cheerio.Element[]): cheerio.Element[] {
     const textContent = $node.text().trim();
 
     // Skip empty nodes or very short content
-    if (!textContent || textContent.length === 0) continue;
+    if (!textContent || textContent.length < 5) continue;
 
     // Also check HTML content to catch more duplicates
     const htmlContent = $temp.html(node).trim();
 
+    // Normalize text for better duplicate detection
+    const normalizedText = textContent
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+
     // Check if we've already processed this content (either text or HTML)
-    if (!processedHtml.has(htmlContent)) {
-      processedText.add(textContent);
-      processedHtml.add(htmlContent);
-      uniqueNodes.push(node);
+    if (!processedHtml.has(htmlContent) && !processedText.has(normalizedText)) {
+      // Additional check: avoid very repetitive content
+      const words = normalizedText.split(/\s+/);
+      const uniqueWords = new Set(words);
+      const repetitionRatio = uniqueWords.size / words.length;
+      
+      // Only include if it's not too repetitive (more than 40% unique words) or if it's short
+      if (repetitionRatio > 0.4 || words.length < 10) {
+        processedText.add(normalizedText);
+        processedHtml.add(htmlContent);
+        uniqueNodes.push(node);
+      }
     }
   }
 
@@ -380,7 +421,6 @@ function testContentCompleteness($: cheerio.Root, document: Document) {
     console.log('\n=== DIFFERENCES FOUND ===');
     console.log('Normalized original text starts with:', normalizedOriginal.substring(0, 200));
     console.log('Normalized extracted text starts with:', normalizedExtracted.substring(0, 200));
-
     // Find the first difference
     const minLength = Math.min(normalizedOriginal.length, normalizedExtracted.length);
     for (let i = 0; i < minLength; i++) {
