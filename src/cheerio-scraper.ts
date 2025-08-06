@@ -246,20 +246,11 @@ function extractContentBetweenSections($: cheerio.Root, currentId: string, nextI
     const text = $(element).text().trim();
     
     // Only include elements with substantial content and avoid very repetitive content
-    if (html && html.trim() && text.length > 10) {
-      // Additional filtering: check for repetitive patterns
-      const normalizedText = text.replace(/\s+/g, ' ').trim().toLowerCase();
-      const words = normalizedText.split(/\s+/);
-      const uniqueWords = new Set(words);
-      const repetitionRatio = uniqueWords.size / words.length;
-      
-      // Only include if it's not too repetitive or if it's substantial content
-      if (repetitionRatio > 0.3 || words.length > 20) {
+    if (html && html.trim() && text.length) {
         rawElements.push({
           type: 'raw',
           content: html
         });
-      }
     }
   }
   
@@ -278,30 +269,16 @@ function removeDuplicateNodes(nodes: cheerio.Element[]): cheerio.Element[] {
     const textContent = $node.text().trim();
 
     // Skip empty nodes or very short content
-    if (!textContent || textContent.length < 5) continue;
+    if (!textContent || textContent.length === 0) continue;
 
     // Also check HTML content to catch more duplicates
     const htmlContent = $temp.html(node).trim();
 
-    // Normalize text for better duplicate detection
-    const normalizedText = textContent
-      .replace(/\s+/g, ' ')
-      .trim()
-      .toLowerCase();
-
     // Check if we've already processed this content (either text or HTML)
-    if (!processedHtml.has(htmlContent) && !processedText.has(normalizedText)) {
-      // Additional check: avoid very repetitive content
-      const words = normalizedText.split(/\s+/);
-      const uniqueWords = new Set(words);
-      const repetitionRatio = uniqueWords.size / words.length;
-      
-      // Only include if it's not too repetitive (more than 40% unique words) or if it's short
-      if (repetitionRatio > 0.4 || words.length < 10) {
-        processedText.add(normalizedText);
-        processedHtml.add(htmlContent);
-        uniqueNodes.push(node);
-      }
+    if (!processedHtml.has(htmlContent)) {
+      processedText.add(textContent);
+      processedHtml.add(htmlContent);
+      uniqueNodes.push(node);
     }
   }
 
