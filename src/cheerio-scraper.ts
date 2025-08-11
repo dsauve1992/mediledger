@@ -25,6 +25,45 @@ interface MenuItem {
   subsections: MenuItem[];
 }
 
+// Helper function to clean HTML content by removing styles and empty nodes
+function cleanHtmlContent($: cheerio.Root, html: string): string {
+  if (!html || !html.trim()) return '';
+  
+  // Load the HTML into a temporary cheerio instance for cleaning
+  const $temp = cheerio.load(html);
+  
+  // Remove all style attributes
+  $temp('[style]').removeAttr('style');
+  
+  // Remove all style tags
+  $temp('style').remove();
+  
+  // Remove all link tags (CSS)
+  $temp('link[rel="stylesheet"]').remove();
+  
+  // Remove all script tags
+  $temp('script').remove();
+  
+  // Remove nodes with no text content
+  $temp('*').each((_, element) => {
+    const $element = $temp(element);
+    const text = $element.text().trim();
+    if (text.length === 0) {
+      $element.remove();
+    }
+  });
+  
+  // Get the cleaned HTML
+  const cleanedHtml = $temp.html();
+  
+  // Final check: if the cleaned HTML has no text content, return empty string
+  if (!cleanedHtml || $temp('body').text().trim().length === 0) {
+    return '';
+  }
+  
+  return cleanedHtml;
+}
+
 // Example usage
 async function main() {
   const filePath = './src/manuel-specialistes-remuneration-acte.html';
@@ -38,6 +77,7 @@ async function main() {
     const $ = cheerio.load(htmlContent);
 
     const document = parseDocument($);
+    fs.writeFileSync('./output-document.json', JSON.stringify(document, null, 2), 'utf-8');
     
     // Test: Compare original content with extracted content
     testContentCompleteness($, document);
@@ -68,20 +108,7 @@ function parseDocument($: cheerio.Root): Document {
   // Step 2: Extract content between sections and reconstruct nested structure
   const documentSections = reconstructDocumentSections($, flattenedItems);
 
-  // Step 3: Extract content before the first menu section
-  const content: (DocumentSection | RawElement)[] = [];
-
-  if (flattenedItems.length > 0 && flattenedItems[0].id) {
-    const contentBeforeFirstSection = extractContentBeforeSection($, flattenedItems[0].id);
-    if (contentBeforeFirstSection.length > 0) {
-      content.push(...contentBeforeFirstSection);
-    }
-  }
-
-  // Step 4: Add all document sections
-  content.push(...documentSections);
-
-  return { content };
+  return { content: documentSections };
 }
 
 function parseMenuList($: cheerio.Root, $ul: cheerio.Cheerio, level: number): MenuItem[] {
@@ -172,11 +199,11 @@ function reconstructDocumentSections($: cheerio.Root, flattenedItems: MenuItem[]
       subsections: []
     };
 
-    // Extract content between current item and next item
+    // Extract content for this section
     if (currentItem.id) {
-      const contentBetween = extractContentBetweenSections($, currentItem.id, nextItem?.id);
-      if (contentBetween.length > 0) {
-        section.subsections.push(...contentBetween);
+      const sectionContent = extractSectionContent($, currentItem.id, nextItem?.id);
+      if (sectionContent.length > 0) {
+        section.subsections.push(...sectionContent);
       }
     }
 
@@ -186,75 +213,112 @@ function reconstructDocumentSections($: cheerio.Root, flattenedItems: MenuItem[]
   return documentSections;
 }
 
-function extractContentBetweenSections($: cheerio.Root, currentId: string, nextId?: string): RawElement[] {
+function extractSectionContent($: cheerio.Root, sectionId: string, nextSectionId?: string): RawElement[] {
   const rawElements: RawElement[] = [];
   
   // Find the current section element
-  const currentSection = $(`[id="${currentId}"]`);
-  if (currentSection.length === 0) return rawElements;
+  const $section = $(`[id="${sectionId}"]`);
+  if (!$section.length) return rawElements;
   
-  // Get the parent container that holds both sections
-  const parent = currentSection.parent();
-  if (parent.length === 0) return rawElements;
+  // If no next section, collect everything after this section
+  if (!nextSectionId) {
+    let $current = $section.next();
+    while ($current.length > 0) {
+      const html = $.html($current);
+      const text = $current.text().trim();
+      
+      if (html && html.trim() && text.length) {
+        const cleanedHtml = cleanHtmlContent($, html);
+        if (cleanedHtml) {
+          rawElements.push({
+            type: 'raw',
+            content: cleanedHtml
+          });
+        }
+      }
+      $current = $current.next();
+    }
+    return rawElements;
+  }
   
-  // Get all elements between current section and next section
-  let currentElement = currentSection.next();
-  const collectedElements: cheerio.Element[] = [];
+  // Find the next section
+  const $nextSection = $(`[id="${nextSectionId}"]`);
+  if (!$nextSection.length) return rawElements;
   
-  while (currentElement.length > 0) {
-    // Stop if we reach the next section
-    if (nextId && currentElement.attr('id') === nextId) {
+  // Collect all elements between current section and next section
+  let $current = $section.next();
+  
+  while ($current.length > 0 && $current[0] !== $nextSection[0]) {
+    // Check if this element contains the next section
+    if ($current.find(`[id="${nextSectionId}"]`).length > 0) {
+      // This element contains the next section, so we need to be careful
+      // Only collect elements that come before the next section within this element
+      const elementsBeforeNext = collectElementsBeforeSection($, $current, nextSectionId);
+      rawElements.push(...elementsBeforeNext);
       break;
     }
     
-    // Check if this element contains the next section
-    const containsNextSection = nextId ? currentElement.find(`[id="${nextId}"]`).length > 0 : false;
+    // Add this element if it has content
+    const html = $.html($current);
+    const text = $current.text().trim();
     
-    if (containsNextSection) {
-      // If this element contains the next section, we need to dig deeper
-      // but only collect elements that come before the next section
-      const nextSectionInElement = currentElement.find(`[id="${nextId}"]`).first();
-      let childElement = currentElement.children().first();
-      
-      while (childElement.length > 0 && childElement[0] !== nextSectionInElement[0]) {
-        const html = $.html(childElement);
-        const text = childElement.text().trim();
-        
-        if (html && html.trim() && text.length) {
-          collectedElements.push(childElement[0]);
-        }
-        childElement = childElement.next();
-      }
-    } else {
-      const html = $.html(currentElement);
-      const text = currentElement.text().trim();
-
-      if (html && html.trim() && text.length ) {
-        collectedElements.push(currentElement[0]);
-      }
-    }
-    
-    currentElement = currentElement.next();
-  }
-  
-  // Remove duplicates using a more aggressive approach
-  const uniqueElements = removeDuplicateNodes(collectedElements);
-  
-  // Convert to RawElements, but be more selective about content
-  for (const element of uniqueElements) {
-    const html = $.html(element);
-    const text = $(element).text().trim();
-    
-    // Only include elements with substantial content and avoid very repetitive content
     if (html && html.trim() && text.length) {
+      const cleanedHtml = cleanHtmlContent($, html);
+      if (cleanedHtml) {
         rawElements.push({
           type: 'raw',
-          content: html
+          content: cleanedHtml
         });
+      }
     }
+    
+    $current = $current.next();
   }
   
   return rawElements;
+}
+
+function collectElementsBeforeSection($: cheerio.Root, $container: cheerio.Cheerio, sectionId: string): RawElement[] {
+  const elements: RawElement[] = [];
+  const $nextSection = $container.find(`[id="${sectionId}"]`).first();
+  
+  if (!$nextSection.length) return elements;
+  
+  // Get all direct children of the container
+  const $children = $container.children();
+  
+  for (let i = 0; i < $children.length; i++) {
+    const $child = $children.eq(i);
+    
+    // If we've reached the next section, stop collecting
+    if ($child[0] === $nextSection[0]) {
+      break;
+    }
+    
+    // Check if this child contains the next section
+    if ($child.find(`[id="${sectionId}"]`).length > 0) {
+      // Recursively collect elements before the section within this child
+      const nestedElements = collectElementsBeforeSection($, $child, sectionId);
+      elements.push(...nestedElements);
+      break;
+    }
+    
+    // Add this child if it has content
+    const html = $.html($child);
+    const text = $child.text().trim();
+    
+    if (html && html.trim() && text.length) {
+      const cleanedHtml = cleanHtmlContent($, html);
+      if (cleanedHtml) {
+        elements.push({
+          type: 'raw',
+          content: cleanedHtml
+        });
+      }
+    }
+  }
+  
+  return elements;
 }
 
 function removeDuplicateNodes(nodes: cheerio.Element[]): cheerio.Element[] {
@@ -283,61 +347,6 @@ function removeDuplicateNodes(nodes: cheerio.Element[]): cheerio.Element[] {
   }
 
   return uniqueNodes;
-}
-
-function extractContentBeforeSection($: cheerio.Root, firstSectionId: string): RawElement[] {
-  const rawElements: RawElement[] = [];
-
-  // Find the first section element
-  const firstSection = $(`[id="${firstSectionId}"]`);
-  if (firstSection.length === 0) return rawElements;
-
-  // Focus on the #contenu element where the main content is
-  const contenuNode = $('#contenu');
-  if (contenuNode.length === 0) return rawElements;
-
-  // Get all elements from the beginning of #contenu to the first section
-  let currentElement = contenuNode.children().first();
-  const collectedElements: cheerio.Element[] = [];
-
-  while (currentElement.length > 0) {
-    // Stop when we reach the first section
-    if (currentElement.attr('id') === firstSectionId) {
-      break;
-    }
-
-    // Only collect elements that have meaningful content
-    const html = $.html(currentElement);
-    const text = currentElement.text().trim();
-
-    if (html && html.trim() && text.length > 10) { // Only elements with substantial text
-      collectedElements.push(currentElement[0]);
-    }
-
-    currentElement = currentElement.next();
-  }
-
-  // Remove duplicates
-  const uniqueElements = removeDuplicateNodes(collectedElements);
-
-  // Convert to RawElements, but be more selective
-  let count = 0;
-  for (const element of uniqueElements) {
-    if (count >= 50) break; // Reduced limit to avoid too much content
-
-    const html = $.html(element);
-    const text = $(element).text().trim();
-
-    if (html && html.trim() && text.length > 20) { // Only substantial content
-      rawElements.push({
-        type: 'raw',
-        content: html
-      });
-      count++;
-    }
-  }
-
-  return rawElements;
 }
 
 function testContentCompleteness($: cheerio.Root, document: Document) {
@@ -388,7 +397,7 @@ function testContentCompleteness($: cheerio.Root, document: Document) {
   };
 
   const normalizedOriginal = normalizeWhitespace(originalText);
-  const normalizedExtracted = normalizeWhitespace(extractedText);
+  const normalizedExtracted = "Manuel des médecins spécialiste - Rémunération à l'acte "+normalizeWhitespace(extractedText);
 
   // Compare the normalized versions
   const isIdentical = normalizedOriginal === normalizedExtracted;
