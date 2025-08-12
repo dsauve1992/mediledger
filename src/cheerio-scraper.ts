@@ -333,7 +333,7 @@ function extractSectionContent($: cheerio.Root, sectionId: string, nextSectionId
     const html = $.html($current);
     const text = $current.text().trim();
     
-    if (html && html.trim() && text.length > 5) {
+    if (html && html.trim() && text.length > 0) {
       // Check if this element contains any section headers (avoid collecting nested sections)
       const hasSectionHeaders = $current.find('h1, h2, h3, h4, h5, h6').length > 0;
       
