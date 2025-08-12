@@ -25,45 +25,6 @@ interface MenuItem {
   subsections: MenuItem[];
 }
 
-// Helper function to clean HTML content by removing styles and empty nodes
-function cleanHtmlContent($: cheerio.Root, html: string): string {
-  if (!html || !html.trim()) return '';
-  
-  // Load the HTML into a temporary cheerio instance for cleaning
-  const $temp = cheerio.load(html);
-  
-  // Remove all style attributes
-  $temp('[style]').removeAttr('style');
-  
-  // Remove all style tags
-  $temp('style').remove();
-  
-  // Remove all link tags (CSS)
-  $temp('link[rel="stylesheet"]').remove();
-  
-  // Remove all script tags
-  $temp('script').remove();
-  
-  // Remove nodes with no text content
-  $temp('*').each((_, element) => {
-    const $element = $temp(element);
-    const text = $element.text().trim();
-    if (text.length === 0) {
-      $element.remove();
-    }
-  });
-  
-  // Get the cleaned HTML
-  const cleanedHtml = $temp.html();
-  
-  // Final check: if the cleaned HTML has no text content, return empty string
-  if (!cleanedHtml || $temp('body').text().trim().length === 0) {
-    return '';
-  }
-  
-  return cleanedHtml;
-}
-
 // Example usage
 async function main() {
   const filePath = './src/manuel-specialistes-remuneration-acte.html';
@@ -174,6 +135,22 @@ function flattenMenuItems(menuItems: MenuItem[]): MenuItem[] {
 function reconstructDocumentSections($: cheerio.Root, flattenedItems: MenuItem[]): DocumentSection[] {
   const documentSections: DocumentSection[] = [];
 
+  // Step 1: Validate that the order of menu items is respected in the content node
+  const validationResult = validateMenuOrderInContent($, flattenedItems);
+  if (!validationResult.isValid) {
+    console.warn('⚠️  Menu order validation failed:', validationResult.issues);
+    console.warn('Proceeding with processing, but content order may be incorrect');
+    
+    // Optionally reorder items based on DOM position
+    const reorderedItems = reorderItemsByDomPosition($, flattenedItems);
+    if (reorderedItems.length > 0) {
+      console.log('🔄 Reordering items based on DOM position for more accurate content extraction');
+      flattenedItems = reorderedItems;
+    }
+  } else {
+    console.log('✅ Menu order validation passed - all sections appear in correct order');
+  }
+
   for (let i = 0; i < flattenedItems.length; i++) {
     const currentItem = flattenedItems[i];
     const nextItem = flattenedItems[i + 1];
@@ -213,6 +190,110 @@ function reconstructDocumentSections($: cheerio.Root, flattenedItems: MenuItem[]
   return documentSections;
 }
 
+function reorderItemsByDomPosition($: cheerio.Root, flattenedItems: MenuItem[]): MenuItem[] {
+  const contenuNode = $('#contenu');
+  if (!contenuNode.length) return flattenedItems;
+
+  // Filter items that have IDs
+  const itemsWithIds = flattenedItems.filter(item => item.id);
+  
+  // Find all section elements in the content node and their DOM positions
+  const sectionPositions: { item: MenuItem; domIndex: number }[] = [];
+  
+  contenuNode.find('*[id]').each((domIndex, element) => {
+    const $element = $(element);
+    const id = $element.attr('id');
+    const menuItem = itemsWithIds.find(item => item.id === id);
+    
+    if (menuItem) {
+      sectionPositions.push({
+        item: menuItem,
+        domIndex
+      });
+    }
+  });
+
+  // Sort by DOM position
+  sectionPositions.sort((a, b) => a.domIndex - b.domIndex);
+
+  // Create reordered list
+  const reorderedItems: MenuItem[] = [];
+  
+  // Add items that were found in DOM in their correct order
+  sectionPositions.forEach(({ item }) => {
+    reorderedItems.push(item);
+  });
+
+  // Add any remaining items that weren't found in DOM (they'll be at the end)
+  const foundIds = new Set(sectionPositions.map(sp => sp.item.id));
+  const remainingItems = itemsWithIds.filter(item => !foundIds.has(item.id));
+  reorderedItems.push(...remainingItems);
+
+  return reorderedItems;
+}
+
+function validateMenuOrderInContent($: cheerio.Root, flattenedItems: MenuItem[]): { isValid: boolean; issues: string[] } {
+  const issues: string[] = [];
+  const contenuNode = $('#contenu');
+  
+  if (!contenuNode.length) {
+    issues.push('No #contenu node found');
+    return { isValid: false, issues };
+  }
+
+  // Filter items that have IDs
+  const itemsWithIds = flattenedItems.filter(item => item.id);
+  
+  if (itemsWithIds.length === 0) {
+    issues.push('No menu items with IDs found');
+    return { isValid: false, issues };
+  }
+
+  // Find all section elements in the content node
+  const sectionElements: { id: string; element: cheerio.Element; index: number }[] = [];
+  
+  contenuNode.find('*[id]').each((index, element) => {
+    const $element = $(element);
+    const id = $element.attr('id');
+    if (id && itemsWithIds.some(item => item.id === id)) {
+      sectionElements.push({
+        id,
+        element,
+        index
+      });
+    }
+  });
+
+  // Sort section elements by their DOM order
+  sectionElements.sort((a, b) => a.index - b.index);
+
+  // Check if the order matches the menu order
+  let isValid = true;
+  for (let i = 0; i < sectionElements.length - 1; i++) {
+    const currentId = sectionElements[i].id;
+    const nextId = sectionElements[i + 1].id;
+    
+    const currentMenuIndex = itemsWithIds.findIndex(item => item.id === currentId);
+    const nextMenuIndex = itemsWithIds.findIndex(item => item.id === nextId);
+    
+    if (currentMenuIndex > nextMenuIndex) {
+      isValid = false;
+      issues.push(`Section "${currentId}" appears in DOM before "${nextId}" but comes after it in menu order`);
+    }
+  }
+
+  // Additional check: verify all menu items with IDs are found in content
+  const foundIds = new Set(sectionElements.map(se => se.id));
+  const missingIds = itemsWithIds.filter(item => !foundIds.has(item.id!));
+  
+  if (missingIds.length > 0) {
+    isValid = false;
+    issues.push(`Missing sections in content: ${missingIds.map(item => item.id).join(', ')}`);
+  }
+
+  return { isValid, issues };
+}
+
 function extractSectionContent($: cheerio.Root, sectionId: string, nextSectionId?: string): RawElement[] {
   const rawElements: RawElement[] = [];
   
@@ -220,15 +301,44 @@ function extractSectionContent($: cheerio.Root, sectionId: string, nextSectionId
   const $section = $(`[id="${sectionId}"]`);
   if (!$section.length) return rawElements;
   
-  // If no next section, collect everything after this section
-  if (!nextSectionId) {
-    let $current = $section.next();
-    while ($current.length > 0) {
-      const html = $.html($current);
-      const text = $current.text().trim();
+  // Find the next section element if it exists
+  const $nextSection = nextSectionId ? $(`[id="${nextSectionId}"]`) : null;
+  
+  // Start from the current section and collect all content until we hit the next section
+  let $current = $section;
+  
+  while ($current.length > 0) {
+    // Move to the next element
+    $current = $current.next();
+    
+    // Stop if we hit the next section
+    if ($nextSection && $current[0] === $nextSection[0]) {
+      break;
+    }
+    
+    // Stop if this element contains the next section
+    if ($nextSection && $current.find(`[id="${nextSectionId}"]`).length > 0) {
+      break;
+    }
+    
+    // Stop if we hit another section header (any div with an ID that's not the current one)
+    if ($current.attr('id') && $current.attr('id') !== sectionId) {
+      // Check if this looks like a section header (contains h1, h2, h3, etc.)
+      if ($current.find('h1, h2, h3, h4, h5, h6').length > 0) {
+        break;
+      }
+    }
+    
+    // Only collect if this element has meaningful content
+    const html = $.html($current);
+    const text = $current.text().trim();
+    
+    if (html && html.trim() && text.length > 5) {
+      // Check if this element contains any section headers (avoid collecting nested sections)
+      const hasSectionHeaders = $current.find('h1, h2, h3, h4, h5, h6').length > 0;
       
-      if (html && html.trim() && text.length) {
-        const cleanedHtml = cleanHtmlContent($, html);
+      if (!hasSectionHeaders) {
+        const cleanedHtml = cleanHtmlContent(html);
         if (cleanedHtml) {
           rawElements.push({
             type: 'raw',
@@ -236,117 +346,48 @@ function extractSectionContent($: cheerio.Root, sectionId: string, nextSectionId
           });
         }
       }
-      $current = $current.next();
     }
-    return rawElements;
-  }
-  
-  // Find the next section
-  const $nextSection = $(`[id="${nextSectionId}"]`);
-  if (!$nextSection.length) return rawElements;
-  
-  // Collect all elements between current section and next section
-  let $current = $section.next();
-  
-  while ($current.length > 0 && $current[0] !== $nextSection[0]) {
-    // Check if this element contains the next section
-    if ($current.find(`[id="${nextSectionId}"]`).length > 0) {
-      // This element contains the next section, so we need to be careful
-      // Only collect elements that come before the next section within this element
-      const elementsBeforeNext = collectElementsBeforeSection($, $current, nextSectionId);
-      rawElements.push(...elementsBeforeNext);
-      break;
-    }
-    
-    // Add this element if it has content
-    const html = $.html($current);
-    const text = $current.text().trim();
-    
-    if (html && html.trim() && text.length) {
-      const cleanedHtml = cleanHtmlContent($, html);
-      if (cleanedHtml) {
-        rawElements.push({
-          type: 'raw',
-          content: cleanedHtml
-        });
-      }
-    }
-    
-    $current = $current.next();
   }
   
   return rawElements;
 }
 
-function collectElementsBeforeSection($: cheerio.Root, $container: cheerio.Cheerio, sectionId: string): RawElement[] {
-  const elements: RawElement[] = [];
-  const $nextSection = $container.find(`[id="${sectionId}"]`).first();
-  
-  if (!$nextSection.length) return elements;
-  
-  // Get all direct children of the container
-  const $children = $container.children();
-  
-  for (let i = 0; i < $children.length; i++) {
-    const $child = $children.eq(i);
-    
-    // If we've reached the next section, stop collecting
-    if ($child[0] === $nextSection[0]) {
-      break;
+function cleanHtmlContent(html: string): string {
+  if (!html || !html.trim()) return '';
+
+  // Load the HTML into a temporary cheerio instance for cleaning
+  const $temp = cheerio.load(html);
+
+  // Remove all style attributes
+  $temp('[style]').removeAttr('style');
+
+  // Remove all style tags
+  $temp('style').remove();
+
+  // Remove all link tags (CSS)
+  $temp('link[rel="stylesheet"]').remove();
+
+  // Remove all script tags
+  $temp('script').remove();
+
+  // Remove nodes with no text content
+  $temp('*').each((_, element) => {
+    const $element = $temp(element);
+    const text = $element.text()
+    if (text.length === 0) {
+      $element.remove();
     }
-    
-    // Check if this child contains the next section
-    if ($child.find(`[id="${sectionId}"]`).length > 0) {
-      // Recursively collect elements before the section within this child
-      const nestedElements = collectElementsBeforeSection($, $child, sectionId);
-      elements.push(...nestedElements);
-      break;
-    }
-    
-    // Add this child if it has content
-    const html = $.html($child);
-    const text = $child.text().trim();
-    
-    if (html && html.trim() && text.length) {
-      const cleanedHtml = cleanHtmlContent($, html);
-      if (cleanedHtml) {
-        elements.push({
-          type: 'raw',
-          content: cleanedHtml
-        });
-      }
-    }
-  }
-  
-  return elements;
-}
+  });
 
-function removeDuplicateNodes(nodes: cheerio.Element[]): cheerio.Element[] {
-  const uniqueNodes: cheerio.Element[] = [];
-  const processedText = new Set<string>();
-  const processedHtml = new Set<string>();
+  // Get the cleaned HTML
+  const cleanedHtml = $temp.html();
 
-  for (const node of nodes) {
-    // Extract text content for comparison
-    const $temp = cheerio.load('');
-    const $node = $temp('body').append($temp.html(node));
-    const textContent = $node.text().trim();
-
-    // Skip empty nodes or very short content
-    if (!textContent || textContent.length === 0) continue;
-
-    // Also check HTML content to catch more duplicates
-    const htmlContent = $temp.html(node).trim();
-
-    // Check if we've already processed this content (either text or HTML)
-    if (!processedHtml.has(htmlContent)) {
-      processedText.add(textContent);
-      processedHtml.add(htmlContent);
-      uniqueNodes.push(node);
-    }
+  // Final check: if the cleaned HTML has no text content, return empty string
+  if (!cleanedHtml || $temp('body').text().trim().length === 0) {
+    return '';
   }
 
-  return uniqueNodes;
+  return cleanedHtml;
 }
 
 function testContentCompleteness($: cheerio.Root, document: Document) {
