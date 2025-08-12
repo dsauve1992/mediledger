@@ -321,10 +321,11 @@ function extractSectionContent($: cheerio.Root, sectionId: string, nextSectionId
       break;
     }
     
-    // Stop if we hit another section header (any div with an ID that's not the current one)
+    // Stop if we hit another major section header (h1, h2) that's not the current one
     if ($current.attr('id') && $current.attr('id') !== sectionId) {
-      // Check if this looks like a section header (contains h1, h2, h3, etc.)
-      if ($current.find('h1, h2, h3, h4, h5, h6').length > 0) {
+      // Check if this looks like a major section header (contains h1 or h2)
+      if ($current.find('h1, h2').length > 0) {
+        // But allow h3 and below as they are subsections within the current section
         break;
       }
     }
@@ -334,10 +335,10 @@ function extractSectionContent($: cheerio.Root, sectionId: string, nextSectionId
     const text = $current.text().trim();
     
     if (html && html.trim() && text.length > 0) {
-      // Check if this element contains any section headers (avoid collecting nested sections)
-      const hasSectionHeaders = $current.find('h1, h2, h3, h4, h5, h6').length > 0;
+      // Check if this element contains any major section headers (avoid collecting nested major sections)
+      const hasMajorSectionHeaders = $current.find('h1, h2').length > 0;
       
-      if (!hasSectionHeaders) {
+      if (!hasMajorSectionHeaders) {
         const cleanedHtml = cleanHtmlContent(html);
         if (cleanedHtml) {
           rawElements.push({
