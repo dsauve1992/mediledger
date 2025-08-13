@@ -384,8 +384,9 @@ function extractSectionContent($: cheerio.Root, sectionId: string, nextSectionId
       const $tempSection = $section.clone();
       const $tempContent = $('<div>').html(sectionHtml);
       
-      // Remove any nested section headers
+      // Remove any nested section headers and the section header itself
       $tempContent.find('[id]').remove();
+      $tempContent.find('h1, h2').remove(); // Remove headers to avoid duplication
       
       const cleanedHtml = cleanHtmlContent($tempContent.html() || '');
       if (cleanedHtml) {
