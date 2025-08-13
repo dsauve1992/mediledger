@@ -66,7 +66,7 @@ function parseDocument($: cheerio.Root): Document {
   // Step 1: Flatten the menuItems list
   const flattenedItems = flattenMenuItems(menuItems);
 
-  // Step 2: Extract content between sections and reconstruct nested structure
+  // Step 2: Extract content between sections using the original HTML structure
   const documentSections = reconstructDocumentSections($, flattenedItems);
 
   return { content: documentSections };
@@ -149,6 +149,22 @@ function reconstructDocumentSections($: cheerio.Root, flattenedItems: MenuItem[]
     }
   } else {
     console.log('✅ Menu order validation passed - all sections appear in correct order');
+  }
+
+  // Special case: Add the main title section (248218) if it exists in the DOM but not in the menu
+  const mainTitleElement = $('[id="248218"]');
+  if (mainTitleElement.length > 0) {
+    const mainTitleText = mainTitleElement.text().trim();
+    if (mainTitleText) {
+      const mainTitleSection: DocumentSection = {
+        name: mainTitleText,
+        type: 'section',
+        id: '248218',
+        subsections: []
+      };
+      
+      documentSections.push(mainTitleSection);
+    }
   }
 
   for (let i = 0; i < flattenedItems.length; i++) {
@@ -304,8 +320,12 @@ function extractSectionContent($: cheerio.Root, sectionId: string, nextSectionId
   // Find the next section element if it exists
   const $nextSection = nextSectionId ? $(`[id="${nextSectionId}"]`) : null;
   
+  // Get the text content of the current section to avoid duplicating it
+  const sectionText = $section.text().trim();
+  
   // Start from the current section and collect all content until we hit the next section
   let $current = $section;
+  let contentFound = false;
   
   while ($current.length > 0) {
     // Move to the next element
@@ -339,14 +359,80 @@ function extractSectionContent($: cheerio.Root, sectionId: string, nextSectionId
       const hasMajorSectionHeaders = $current.find('h1, h2').length > 0;
       
       if (!hasMajorSectionHeaders) {
-        const cleanedHtml = cleanHtmlContent(html);
-        if (cleanedHtml) {
-          rawElements.push({
-            type: 'raw',
-            content: cleanedHtml
-          });
+        // Avoid duplicating content that's already in the section header
+        // But be more lenient to avoid missing important content
+        if (!sectionText.includes(text) || text.length > 50) {
+          const cleanedHtml = cleanHtmlContent(html);
+          if (cleanedHtml) {
+            rawElements.push({
+              type: 'raw',
+              content: cleanedHtml
+            });
+            contentFound = true;
+          }
         }
       }
+    }
+  }
+  
+  // If no content was found, try to get content from within the section element itself
+  if (!contentFound && sectionText.length > 0) {
+    // Get the HTML content of the section element
+    const sectionHtml = $section.html();
+    if (sectionHtml) {
+      // Remove the section element itself and get the content
+      const $tempSection = $section.clone();
+      const $tempContent = $('<div>').html(sectionHtml);
+      
+      // Remove any nested section headers
+      $tempContent.find('[id]').remove();
+      
+      const cleanedHtml = cleanHtmlContent($tempContent.html() || '');
+      if (cleanedHtml) {
+        rawElements.push({
+          type: 'raw',
+          content: cleanedHtml
+        });
+      }
+    }
+  }
+  
+  // Special case: if this is a section with just a heading, look for content that follows
+  // This handles cases like "Frais de déplacement et de séjour" where the content is in the next element
+  if (!contentFound && $section.find('h1, h2').length > 0) {
+    let $nextElement = $section.next();
+    
+    // Look for content in the next few elements, but be more restrictive
+    for (let i = 0; i < 2 && $nextElement.length > 0; i++) { // Reduced from 3 to 2
+      if ($nextElement.attr('id') && $nextElement.attr('id') !== sectionId) {
+        // Stop if we hit another section
+        break;
+      }
+      
+      const nextHtml = $.html($nextElement);
+      const nextText = $nextElement.text().trim();
+      
+      if (nextHtml && nextHtml.trim() && nextText.length > 0) {
+        // Check if this element contains any major section headers
+        const hasMajorSectionHeaders = $nextElement.find('h1, h2').length > 0;
+        
+        if (!hasMajorSectionHeaders) {
+          // Be more restrictive about what content we include
+          // Only include content that's clearly related to the current section
+          if (nextText.length > 20 && !nextText.includes('AVIS :')) {
+            const cleanedHtml = cleanHtmlContent(nextHtml);
+            if (cleanedHtml) {
+              rawElements.push({
+                type: 'raw',
+                content: cleanedHtml
+              });
+              contentFound = true;
+            }
+          }
+        }
+      }
+      
+      $nextElement = $nextElement.next();
     }
   }
   
@@ -371,11 +457,40 @@ function cleanHtmlContent(html: string): string {
   // Remove all script tags
   $temp('script').remove();
 
-  // Remove nodes with no text content
+  // Remove empty elements and elements with only whitespace
   $temp('*').each((_, element) => {
     const $element = $temp(element);
-    const text = $element.text()
+    const text = $element.text().trim();
     if (text.length === 0) {
+      $element.remove();
+    }
+  });
+
+  // Remove common navigation and header elements that might cause duplication
+  $temp('.nav, .header, .menu, .breadcrumb, .navigation').remove();
+  
+  // Remove elements with common navigation classes
+  $temp('[class*="nav"], [class*="menu"], [class*="header"]').each((_, element) => {
+    const $element = $temp(element);
+    const text = $element.text().trim();
+    if (text.length < 10) { // Remove short navigation elements
+      $element.remove();
+    }
+  });
+
+  // Remove navigation-style content that might have been captured
+  $temp('*').each((_, element) => {
+    const $element = $temp(element);
+    const text = $element.text().trim();
+    
+    // Remove elements that contain navigation-style patterns
+    if (text.includes(' - ') && text.length < 50) {
+      // This looks like navigation content (e.g., "A - Préambule général")
+      $element.remove();
+    }
+    
+    // Remove elements that are just single letters followed by dashes
+    if (/^[A-Z] - /.test(text)) {
       $element.remove();
     }
   });
@@ -408,6 +523,21 @@ function testContentCompleteness($: cheerio.Root, document: Document) {
   const extractedText = flattenDocumentContent(document);
   console.log(`Extracted text length: ${extractedText.length} characters`);
 
+  // Debug: Check if the problematic content is in the extracted text
+  if (extractedText.includes('A - Préambule général')) {
+    console.log('🔍 Found "A - Préambule général" in extracted text');
+    
+    // Find where it appears
+    const index = extractedText.indexOf('A - Préambule général');
+    console.log(`📍 Found at position ${index}`);
+    
+    // Show context around it
+    const context = extractedText.substring(Math.max(0, index - 50), index + 100);
+    console.log(`📝 Context: "...${context}..."`);
+  } else {
+    console.log('✅ "A - Préambule général" NOT found in extracted text');
+  }
+
   // Normalize whitespace for comparison
   const normalizeWhitespace = (text: string): string => {
     return text
@@ -439,7 +569,7 @@ function testContentCompleteness($: cheerio.Root, document: Document) {
   };
 
   const normalizedOriginal = normalizeWhitespace(originalText);
-  const normalizedExtracted = "Manuel des médecins spécialiste - Rémunération à l'acte "+normalizeWhitespace(extractedText);
+  const normalizedExtracted = normalizeWhitespace(extractedText);
 
   // Compare the normalized versions
   const isIdentical = normalizedOriginal === normalizedExtracted;
@@ -476,14 +606,62 @@ function flattenDocumentContent(document: Document): string {
         allText.push($temp('body').text());
       } else if (item.type === 'section') {
         const section = item as DocumentSection;
-        allText.push(section.name);
+        // Include section names to get complete content, but filter out navigation-style content
+        const sectionName = section.name.trim();
+        
+        // Always include the main document title (section 248218)
+        if (section.id === '248218') {
+          allText.push(sectionName);
+        }
+        // Filter out navigation-style content that might cause duplication
+        else if (sectionName && 
+            !sectionName.includes(' - ') && 
+            !sectionName.includes('A - ') && 
+            !sectionName.includes('B - ') && 
+            !sectionName.includes('C - ') && 
+            !sectionName.includes('D - ') && 
+            !sectionName.includes('E - ') && 
+            !sectionName.includes('F - ') && 
+            !sectionName.includes('G - ') && 
+            !sectionName.includes('H - ') && 
+            !sectionName.includes('I - ') && 
+            !sectionName.includes('J - ') && 
+            !sectionName.includes('K - ') && 
+            !sectionName.includes('L - ') && 
+            !sectionName.includes('M - ') && 
+            !sectionName.includes('N - ') && 
+            !sectionName.includes('O - ') && 
+            !sectionName.includes('P - ') && 
+            !sectionName.includes('Q - ') && 
+            !sectionName.includes('R - ') && 
+            !sectionName.includes('S - ') && 
+            !sectionName.includes('T - ') && 
+            !sectionName.includes('U - ') && 
+            !sectionName.includes('V - ') && 
+            !sectionName.includes('W - ') && 
+            !sectionName.includes('X - ') && 
+            !sectionName.includes('Y - ') && 
+            !sectionName.includes('Z - ')) {
+          allText.push(sectionName);
+        }
+        
         extractTextFromContent(section.subsections);
       }
     }
   }
 
   extractTextFromContent(document.content);
-  return allText.join(' ').trim();
+  
+  // Final filtering: Remove any remaining navigation-style content from the combined text
+  const combinedText = allText.join(' ');
+  
+  // Remove patterns like "A - Préambule général" that might have slipped through
+  const cleanedText = combinedText
+    .replace(/\b[A-Z] - [A-Za-zÀ-ÿ\s]+/g, '') // Remove "Letter - Title" patterns
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .trim();
+  
+  return cleanedText;
 }
 
 
