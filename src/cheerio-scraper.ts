@@ -1,672 +1,249 @@
 import * as cheerio from 'cheerio';
 import * as fs from 'fs';
 import * as path from 'path';
+import {extractNodesPreserveStructure} from "./utils";
+import {existsSync} from "node:fs";
 
 interface Document {
-  content: (DocumentSection | RawElement)[];
+    content: (DocumentSection | RawElement)[];
 }
 
 interface DocumentSection {
-  name: string;
-  type: 'section';
-  id?: string;
-  subsections: (DocumentSection | RawElement)[];
+    name: string;
+    type: 'section';
+    id?: string;
+    subsections: (DocumentSection | RawElement)[];
 }
 
 interface RawElement {
-  type: 'raw';
-  content: string;
+    type: 'raw';
+    content: string;
 }
 
 interface MenuItem {
-  name: string;
-  type: string;
-  id?: string;
-  subsections: MenuItem[];
+    name: string;
+    type: string;
+    id?: string;
+    subsections: MenuItem[];
+}
+
+interface SectionWithContent {
+    id?: string;
+    name: string;
+    content: string;
 }
 
 // Example usage
 async function main() {
-  const filePath = './src/manuel-specialistes-remuneration-acte.html';
+    const filePath = './src/manuel-specialistes-remuneration-acte.html';
 
-  try {
-    console.log('=== STARTING SCRAPER ===');
-    console.log(`Scraping local file: ${filePath}`);
-    
-    const absolutePath = path.resolve(filePath);
-    const htmlContent = fs.readFileSync(absolutePath, 'utf-8');
-    const $ = cheerio.load(htmlContent);
+    try {
+        console.log('=== STARTING SCRAPER ===');
+        console.log(`Scraping local file: ${filePath}`);
 
-    const document = parseDocument($);
-    fs.writeFileSync('./output-document.json', JSON.stringify(document, null, 2), 'utf-8');
-    
-    // Test: Compare original content with extracted content
-    testContentCompleteness($, document);
-  } catch (error) {
-    console.error(`Error scraping local file ${filePath}:`, error);
-  }
+        const absolutePath = path.resolve(filePath);
+        const htmlContent = fs.readFileSync(absolutePath, 'utf-8');
+        const $ = cheerio.load(htmlContent);
+
+        const document = parseDocument($);
+    } catch (error) {
+        console.error(`Error scraping local file ${filePath}:`, error);
+    }
 }
 
-function parseDocument($: cheerio.Root): Document {
-  const menuGauche = $('#menuGauche');
-  if (!menuGauche.length) {
-    console.log('No #menuGauche found in document');
-    return { content: [] };
-  }
+function grabMainSectionsToTheRoot($: cheerio.Root, flattenedItems: MenuItem[]): string {
+    let raw = $.html()
 
-  // Find the main navigation ul
-  const navUl = menuGauche.find('#nav');
-  if (!navUl.length) {
-    console.log('No #nav found in menuGauche');
-    return { content: [] };
-  }
+    for (const index in flattenedItems) {
+        const item = flattenedItems[index];
+        raw = extractNodesPreserveStructure(raw, '#contenu', `#${item.id!}`);
+        console.log(`Extracted content (${parseInt(index) + 1}/${flattenedItems.length}) for ID: ${item.id}`);
+    }
 
-  const menuItems = parseMenuList($, navUl, 1);
+    return raw
+}
 
-  // Step 1: Flatten the menuItems list
-  const flattenedItems = flattenMenuItems(menuItems);
+function getDocumentWithMainSectionAsDirectChildren($: cheerio.Root, flattenedItems: MenuItem[]) {
+    if (fs.existsSync('./modified-raw-content.html')) {
+        console.log('Modified raw content file already exists. Skipping reconstruction.');
 
-  // Step 2: Extract content between sections using the original HTML structure
-  const documentSections = reconstructDocumentSections($, flattenedItems);
+        return fs.readFileSync('./modified-raw-content.html', 'utf-8');
+    }
+    const modifiedContenuSection = grabMainSectionsToTheRoot($, flattenedItems);
+    fs.writeFileSync('./modified-raw-content.html', modifiedContenuSection, 'utf-8');
 
-  return { content: documentSections };
+    return modifiedContenuSection
+}
+
+function parseDocument($: cheerio.Root) {
+    const menuGauche = $('#menuGauche');
+    if (!menuGauche.length) {
+        console.log('No #menuGauche found in document');
+        return {content: []};
+    }
+
+    // Find the main navigation ul
+    const navUl = menuGauche.find('#nav');
+    if (!navUl.length) {
+        console.log('No #nav found in menuGauche');
+        return {content: []};
+    }
+
+    const menuItems = parseMenuList($, navUl, 1);
+
+    // Step 1: Flatten the menuItems list
+    const flattenedItems = flattenMenuItems(menuItems);
+    const modifiedContenuSection = getDocumentWithMainSectionAsDirectChildren($, flattenedItems);
+
+
+    // Step 2: extract content for each main section and its subsections
+    // since every section is now a direct child of #contenu, we can just extract the content between sections and affect that content the previous section. we also have to handle the content before the first section
+    const sectionsWithContent: SectionWithContent[] = [];
+
+
+
+    console.log("sectionsWithContent")
+
+
+    // testContentCompleteness($, modifiedContenuSection);
 }
 
 function parseMenuList($: cheerio.Root, $ul: cheerio.Cheerio, level: number): MenuItem[] {
-  const menuItems: MenuItem[] = [];
+    const menuItems: MenuItem[] = [];
 
-  $ul.children('li').each((_, liElement) => {
-    const $li = $(liElement);
-    const $link = $li.children('a').first();
+    $ul.children('li').each((_, liElement) => {
+        const $li = $(liElement);
+        const $link = $li.children('a').first();
 
-    if ($link.length) {
-      const text = $link.text().trim();
-      const href = $link.attr('href');
-      // Extract just the ID number from the href (e.g., "248224" from the full URL)
-      const id = href ? href.split('#').pop() || undefined : undefined;
+        if ($link.length) {
+            const text = $link.text().trim();
+            const href = $link.attr('href');
+            // Extract just the ID number from the href (e.g., "248224" from the full URL)
+            const id = href ? href.split('#').pop() || undefined : undefined;
 
-      if (text) {
-        const menuItem: MenuItem = {
-          name: text,
-          type: `level${level}`,
-          id: id,
-          subsections: []
-        };
+            if (text) {
+                const menuItem: MenuItem = {
+                    name: text,
+                    type: `level${level}`,
+                    id: id,
+                    subsections: []
+                };
 
-        // Check if this item has nested subsections
-        const $nestedUl = $li.children('ul');
-        if ($nestedUl.length) {
-          menuItem.subsections = parseMenuList($, $nestedUl, level + 1);
+                // Check if this item has nested subsections
+                const $nestedUl = $li.children('ul');
+                if ($nestedUl.length) {
+                    menuItem.subsections = parseMenuList($, $nestedUl, level + 1);
+                }
+
+                menuItems.push(menuItem);
+            }
         }
+    });
 
-        menuItems.push(menuItem);
-      }
-    }
-  });
-
-  return menuItems;
+    return menuItems;
 }
 
 function flattenMenuItems(menuItems: MenuItem[]): MenuItem[] {
-  const flattened: MenuItem[] = [];
+    const flattened: MenuItem[] = [];
 
-  function flattenRecursive(items: MenuItem[]) {
-    for (const item of items) {
-      // Add the current item (without subsections)
-      const flatItem: MenuItem = {
-        name: item.name,
-        type: item.type,
-        id: item.id,
-        subsections: []
-      };
-      flattened.push(flatItem);
+    function flattenRecursive(items: MenuItem[]) {
+        for (const item of items) {
+            // Add the current item (without subsections)
+            const flatItem: MenuItem = {
+                name: item.name,
+                type: item.type,
+                id: item.id,
+                subsections: []
+            };
+            flattened.push(flatItem);
 
-      // Recursively flatten subsections
-      if (item.subsections.length > 0) {
-        flattenRecursive(item.subsections);
-      }
+            // Recursively flatten subsections
+            if (item.subsections.length > 0) {
+                flattenRecursive(item.subsections);
+            }
+        }
     }
-  }
 
-  flattenRecursive(menuItems);
-  return flattened;
+    flattenRecursive(menuItems);
+    return flattened;
 }
 
-function reconstructDocumentSections($: cheerio.Root, flattenedItems: MenuItem[]): DocumentSection[] {
-  const documentSections: DocumentSection[] = [];
 
-  // Step 1: Validate that the order of menu items is respected in the content node
-  const validationResult = validateMenuOrderInContent($, flattenedItems);
-  if (!validationResult.isValid) {
-    console.warn('⚠️  Menu order validation failed:', validationResult.issues);
-    console.warn('Proceeding with processing, but content order may be incorrect');
-    
-    // Optionally reorder items based on DOM position
-    const reorderedItems = reorderItemsByDomPosition($, flattenedItems);
-    if (reorderedItems.length > 0) {
-      console.log('🔄 Reordering items based on DOM position for more accurate content extraction');
-      flattenedItems = reorderedItems;
-    }
-  } else {
-    console.log('✅ Menu order validation passed - all sections appear in correct order');
-  }
+function testContentCompleteness($: cheerio.Root, modifiedContenuNode: string) {
+    console.log('\n=== TESTING CONTENT COMPLETENESS ===');
 
-  // Special case: Add the main title section (248218) if it exists in the DOM but not in the menu
-  const mainTitleElement = $('[id="248218"]');
-  if (mainTitleElement.length > 0) {
-    const mainTitleText = mainTitleElement.text().trim();
-    if (mainTitleText) {
-      const mainTitleSection: DocumentSection = {
-        name: mainTitleText,
-        type: 'section',
-        id: '248218',
-        subsections: []
-      };
-      
-      documentSections.push(mainTitleSection);
-    }
-  }
+    // Get original content from #contenu
+    const originalContenuNode = $('#contenu');
 
-  for (let i = 0; i < flattenedItems.length; i++) {
-    const currentItem = flattenedItems[i];
-    const nextItem = flattenedItems[i + 1];
-
-    // Find the actual element in #contenu and get its real text
-    let actualName = currentItem.name;
-    if (currentItem.id) {
-      const actualElement = $(`[id="${currentItem.id}"]`);
-      if (actualElement.length > 0) {
-        // Get the actual text from the element in #contenu
-        const actualText = actualElement.text().trim();
-        if (actualText) {
-          actualName = actualText;
-        }
-      }
+    if (!originalContenuNode.length) {
+        console.log('❌ No #contenu node found');
+        return;
     }
 
-    // Create the current section with the actual name from #contenu
-    const section: DocumentSection = {
-      name: actualName,
-      type: 'section',
-      id: currentItem.id,
-      subsections: []
+    const originalText = originalContenuNode.text().trim();
+    console.log(`Original #Contenu text length: ${originalText.length} characters`);
+
+    // Flatten our Document content and extract all text
+    const extractedText = cheerio.load(modifiedContenuNode)('#contenu').text().trim();
+    console.log(`Extracted text length: ${extractedText.length} characters`);
+
+    // Normalize whitespace for comparison
+    const normalizeWhitespace = (text: string): string => {
+        return text
+            .replace(/\s+/g, ' ')  // Replace multiple whitespace with single space
+            .replace(/\n+/g, ' ')   // Replace newlines with spaces
+            .replace(/\t/g, ' ')   // Replace tabs with spaces
+            .replace(/—/g, '-')    // Replace em dash with regular dash
+            .replace(/–/g, '-')    // Replace en dash with regular dash
+            .replace(/"/g, '"')    // Replace smart quotes with regular quotes
+            .replace(/"/g, '"')    // Replace smart quotes with regular quotes
+            .replace(/'/g, "'")    // Replace smart apostrophes with regular apostrophes
+            .replace(/'/g, "'")    // Replace smart apostrophes with regular apostrophes
+            .replace(/È/g, 'E')   // Replace È with E
+            .replace(/É/g, 'E')   // Replace É with E
+            .replace(/Ê/g, 'E')   // Replace Ê with E
+            .replace(/Ë/g, 'E')   // Replace Ë with E
+            .replace(/À/g, 'A')   // Replace À with A
+            .replace(/Â/g, 'A')   // Replace Â with A
+            .replace(/Ä/g, 'A')   // Replace Ä with A
+            .replace(/Ù/g, 'U')   // Replace Ù with U
+            .replace(/Û/g, 'U')   // Replace Û with U
+            .replace(/Ü/g, 'U')   // Replace Ü with U
+            .replace(/Î/g, 'I')   // Replace Î with I
+            .replace(/Ï/g, 'I')   // Replace Ï with I
+            .replace(/Ô/g, 'O')   // Replace Ô with O
+            .replace(/Œ/g, 'OE')  // Replace Œ with OE
+            .replace(/œ/g, 'oe')  // Replace œ with oe
+            .trim();               // Remove leading/trailing whitespace
     };
 
-    // Extract content for this section
-    if (currentItem.id) {
-      const sectionContent = extractSectionContent($, currentItem.id, nextItem?.id);
-      if (sectionContent.length > 0) {
-        section.subsections.push(...sectionContent);
-      }
-    }
+    const normalizedOriginal = normalizeWhitespace(originalText);
+    const normalizedExtracted = normalizeWhitespace(extractedText);
 
-    documentSections.push(section);
-  }
+    // Compare the normalized versions
+    const isIdentical = normalizedOriginal === normalizedExtracted;
+    console.log(`Content identical (normalized): ${isIdentical ? '✅ YES' : '❌ NO'}`);
 
-  return documentSections;
-}
-
-function reorderItemsByDomPosition($: cheerio.Root, flattenedItems: MenuItem[]): MenuItem[] {
-  const contenuNode = $('#contenu');
-  if (!contenuNode.length) return flattenedItems;
-
-  // Filter items that have IDs
-  const itemsWithIds = flattenedItems.filter(item => item.id);
-  
-  // Find all section elements in the content node and their DOM positions
-  const sectionPositions: { item: MenuItem; domIndex: number }[] = [];
-  
-  contenuNode.find('*[id]').each((domIndex, element) => {
-    const $element = $(element);
-    const id = $element.attr('id');
-    const menuItem = itemsWithIds.find(item => item.id === id);
-    
-    if (menuItem) {
-      sectionPositions.push({
-        item: menuItem,
-        domIndex
-      });
-    }
-  });
-
-  // Sort by DOM position
-  sectionPositions.sort((a, b) => a.domIndex - b.domIndex);
-
-  // Create reordered list
-  const reorderedItems: MenuItem[] = [];
-  
-  // Add items that were found in DOM in their correct order
-  sectionPositions.forEach(({ item }) => {
-    reorderedItems.push(item);
-  });
-
-  // Add any remaining items that weren't found in DOM (they'll be at the end)
-  const foundIds = new Set(sectionPositions.map(sp => sp.item.id));
-  const remainingItems = itemsWithIds.filter(item => !foundIds.has(item.id));
-  reorderedItems.push(...remainingItems);
-
-  return reorderedItems;
-}
-
-function validateMenuOrderInContent($: cheerio.Root, flattenedItems: MenuItem[]): { isValid: boolean; issues: string[] } {
-  const issues: string[] = [];
-  const contenuNode = $('#contenu');
-  
-  if (!contenuNode.length) {
-    issues.push('No #contenu node found');
-    return { isValid: false, issues };
-  }
-
-  // Filter items that have IDs
-  const itemsWithIds = flattenedItems.filter(item => item.id);
-  
-  if (itemsWithIds.length === 0) {
-    issues.push('No menu items with IDs found');
-    return { isValid: false, issues };
-  }
-
-  // Find all section elements in the content node
-  const sectionElements: { id: string; element: cheerio.Element; index: number }[] = [];
-  
-  contenuNode.find('*[id]').each((index, element) => {
-    const $element = $(element);
-    const id = $element.attr('id');
-    if (id && itemsWithIds.some(item => item.id === id)) {
-      sectionElements.push({
-        id,
-        element,
-        index
-      });
-    }
-  });
-
-  // Sort section elements by their DOM order
-  sectionElements.sort((a, b) => a.index - b.index);
-
-  // Check if the order matches the menu order
-  let isValid = true;
-  for (let i = 0; i < sectionElements.length - 1; i++) {
-    const currentId = sectionElements[i].id;
-    const nextId = sectionElements[i + 1].id;
-    
-    const currentMenuIndex = itemsWithIds.findIndex(item => item.id === currentId);
-    const nextMenuIndex = itemsWithIds.findIndex(item => item.id === nextId);
-    
-    if (currentMenuIndex > nextMenuIndex) {
-      isValid = false;
-      issues.push(`Section "${currentId}" appears in DOM before "${nextId}" but comes after it in menu order`);
-    }
-  }
-
-  // Additional check: verify all menu items with IDs are found in content
-  const foundIds = new Set(sectionElements.map(se => se.id));
-  const missingIds = itemsWithIds.filter(item => !foundIds.has(item.id!));
-  
-  if (missingIds.length > 0) {
-    isValid = false;
-    issues.push(`Missing sections in content: ${missingIds.map(item => item.id).join(', ')}`);
-  }
-
-  return { isValid, issues };
-}
-
-function extractSectionContent($: cheerio.Root, sectionId: string, nextSectionId?: string): RawElement[] {
-  const rawElements: RawElement[] = [];
-  
-  // Find the current section element
-  const $section = $(`[id="${sectionId}"]`);
-  if (!$section.length) return rawElements;
-  
-  // Find the next section element if it exists
-  const $nextSection = nextSectionId ? $(`[id="${nextSectionId}"]`) : null;
-  
-  // Get the text content of the current section to avoid duplicating it
-  const sectionText = $section.text().trim();
-  
-  // Start from the current section and collect all content until we hit the next section
-  let $current = $section;
-  let contentFound = false;
-  
-  while ($current.length > 0) {
-    // Move to the next element
-    $current = $current.next();
-    
-    // Stop if we hit the next section
-    if ($nextSection && $current[0] === $nextSection[0]) {
-      break;
-    }
-    
-    // Stop if this element contains the next section
-    if ($nextSection && $current.find(`[id="${nextSectionId}"]`).length > 0) {
-      break;
-    }
-    
-    // Stop if we hit another major section header (h1, h2) that's not the current one
-    if ($current.attr('id') && $current.attr('id') !== sectionId) {
-      // Check if this looks like a major section header (contains h1 or h2)
-      if ($current.find('h1, h2').length > 0) {
-        // But allow h3 and below as they are subsections within the current section
-        break;
-      }
-    }
-    
-    // Only collect if this element has meaningful content
-    const html = $.html($current);
-    const text = $current.text().trim();
-    
-    if (html && html.trim() && text.length > 0) {
-      // Check if this element contains any major section headers (avoid collecting nested major sections)
-      const hasMajorSectionHeaders = $current.find('h1, h2').length > 0;
-      
-      if (!hasMajorSectionHeaders) {
-        // Avoid duplicating content that's already in the section header
-        // But be more lenient to avoid missing important content
-        if (!sectionText.includes(text) || text.length > 50) {
-          const cleanedHtml = cleanHtmlContent(html);
-          if (cleanedHtml) {
-            rawElements.push({
-              type: 'raw',
-              content: cleanedHtml
-            });
-            contentFound = true;
-          }
-        }
-      }
-    }
-  }
-  
-  // If no content was found, try to get content from within the section element itself
-  if (!contentFound && sectionText.length > 0) {
-    // Get the HTML content of the section element
-    const sectionHtml = $section.html();
-    if (sectionHtml) {
-      // Remove the section element itself and get the content
-      const $tempSection = $section.clone();
-      const $tempContent = $('<div>').html(sectionHtml);
-      
-      // Remove any nested section headers and the section header itself
-      $tempContent.find('[id]').remove();
-      $tempContent.find('h1, h2').remove(); // Remove headers to avoid duplication
-      
-      const cleanedHtml = cleanHtmlContent($tempContent.html() || '');
-      if (cleanedHtml) {
-        rawElements.push({
-          type: 'raw',
-          content: cleanedHtml
-        });
-      }
-    }
-  }
-  
-  // Special case: if this is a section with just a heading, look for content that follows
-  // This handles cases like "Frais de déplacement et de séjour" where the content is in the next element
-  if (!contentFound && $section.find('h1, h2').length > 0) {
-    let $nextElement = $section.next();
-    
-    // Look for content in the next few elements, but be more restrictive
-    for (let i = 0; i < 2 && $nextElement.length > 0; i++) { // Reduced from 3 to 2
-      if ($nextElement.attr('id') && $nextElement.attr('id') !== sectionId) {
-        // Stop if we hit another section
-        break;
-      }
-      
-      const nextHtml = $.html($nextElement);
-      const nextText = $nextElement.text().trim();
-      
-      if (nextHtml && nextHtml.trim() && nextText.length > 0) {
-        // Check if this element contains any major section headers
-        const hasMajorSectionHeaders = $nextElement.find('h1, h2').length > 0;
-        
-        if (!hasMajorSectionHeaders) {
-          // Be more restrictive about what content we include
-          // Only include content that's clearly related to the current section
-          if (nextText.length > 20 && !nextText.includes('AVIS :')) {
-            const cleanedHtml = cleanHtmlContent(nextHtml);
-            if (cleanedHtml) {
-              rawElements.push({
-                type: 'raw',
-                content: cleanedHtml
-              });
-              contentFound = true;
+    if (!isIdentical) {
+        console.log('\n=== DIFFERENCES FOUND ===');
+        console.log('Normalized original text starts with:', normalizedOriginal.substring(0, 200));
+        console.log('Normalized extracted text starts with:', normalizedExtracted.substring(0, 200));
+        // Find the first difference
+        const minLength = Math.min(normalizedOriginal.length, normalizedExtracted.length);
+        for (let i = 0; i < minLength; i++) {
+            if (normalizedOriginal[i] !== normalizedExtracted[i]) {
+                console.log(`First difference at position ${i}:`);
+                console.log(`Original: "${normalizedOriginal.substring(i, i + 50)}"`);
+                console.log(`Extracted: "${normalizedExtracted.substring(i, i + 50)}"`);
+                break;
             }
-          }
         }
-      }
-      
-      $nextElement = $nextElement.next();
+    } else {
+        console.log('🎉 All content successfully extracted!');
     }
-  }
-  
-  return rawElements;
 }
-
-function cleanHtmlContent(html: string): string {
-  if (!html || !html.trim()) return '';
-
-  // Load the HTML into a temporary cheerio instance for cleaning
-  const $temp = cheerio.load(html);
-
-  // Remove all style attributes
-  $temp('[style]').removeAttr('style');
-
-  // Remove all style tags
-  $temp('style').remove();
-
-  // Remove all link tags (CSS)
-  $temp('link[rel="stylesheet"]').remove();
-
-  // Remove all script tags
-  $temp('script').remove();
-
-  // Remove empty elements and elements with only whitespace
-  $temp('*').each((_, element) => {
-    const $element = $temp(element);
-    const text = $element.text().trim();
-    if (text.length === 0) {
-      $element.remove();
-    }
-  });
-
-  // Remove common navigation and header elements that might cause duplication
-  $temp('.nav, .header, .menu, .breadcrumb, .navigation').remove();
-  
-  // Remove elements with common navigation classes
-  $temp('[class*="nav"], [class*="menu"], [class*="header"]').each((_, element) => {
-    const $element = $temp(element);
-    const text = $element.text().trim();
-    if (text.length < 10) { // Remove short navigation elements
-      $element.remove();
-    }
-  });
-
-  // Remove navigation-style content that might have been captured
-  $temp('*').each((_, element) => {
-    const $element = $temp(element);
-    const text = $element.text().trim();
-    
-    // Remove elements that contain navigation-style patterns
-    if (text.includes(' - ') && text.length < 50) {
-      // This looks like navigation content (e.g., "A - Préambule général")
-      $element.remove();
-    }
-    
-    // Remove elements that are just single letters followed by dashes
-    if (/^[A-Z] - /.test(text)) {
-      $element.remove();
-    }
-  });
-
-  // Get the cleaned HTML
-  const cleanedHtml = $temp.html();
-
-  // Final check: if the cleaned HTML has no text content, return empty string
-  if (!cleanedHtml || $temp('body').text().trim().length === 0) {
-    return '';
-  }
-
-  return cleanedHtml;
-}
-
-function testContentCompleteness($: cheerio.Root, document: Document) {
-  console.log('\n=== TESTING CONTENT COMPLETENESS ===');
-
-  // Get original content from #contenu
-  const contenuNode = $('#contenu');
-  if (!contenuNode.length) {
-    console.log('❌ No #contenu node found');
-    return;
-  }
-
-  const originalText = contenuNode.text().trim();
-  console.log(`Original #Contenu text length: ${originalText.length} characters`);
-
-  // Flatten our Document content and extract all text
-  const extractedText = flattenDocumentContent(document);
-  console.log(`Extracted text length: ${extractedText.length} characters`);
-
-  // Debug: Check if the problematic content is in the extracted text
-  if (extractedText.includes('A - Préambule général')) {
-    console.log('🔍 Found "A - Préambule général" in extracted text');
-    
-    // Find where it appears
-    const index = extractedText.indexOf('A - Préambule général');
-    console.log(`📍 Found at position ${index}`);
-    
-    // Show context around it
-    const context = extractedText.substring(Math.max(0, index - 50), index + 100);
-    console.log(`📝 Context: "...${context}..."`);
-  } else {
-    console.log('✅ "A - Préambule général" NOT found in extracted text');
-  }
-
-  // Normalize whitespace for comparison
-  const normalizeWhitespace = (text: string): string => {
-    return text
-      .replace(/\s+/g, ' ')  // Replace multiple whitespace with single space
-      .replace(/\n+/g, ' ')   // Replace newlines with spaces
-      .replace(/\t/g, ' ')   // Replace tabs with spaces
-      .replace(/—/g, '-')    // Replace em dash with regular dash
-      .replace(/–/g, '-')    // Replace en dash with regular dash
-      .replace(/"/g, '"')    // Replace smart quotes with regular quotes
-      .replace(/"/g, '"')    // Replace smart quotes with regular quotes
-      .replace(/'/g, "'")    // Replace smart apostrophes with regular apostrophes
-      .replace(/'/g, "'")    // Replace smart apostrophes with regular apostrophes
-      .replace(/È/g, 'E')   // Replace È with E
-      .replace(/É/g, 'E')   // Replace É with E
-      .replace(/Ê/g, 'E')   // Replace Ê with E
-      .replace(/Ë/g, 'E')   // Replace Ë with E
-      .replace(/À/g, 'A')   // Replace À with A
-      .replace(/Â/g, 'A')   // Replace Â with A
-      .replace(/Ä/g, 'A')   // Replace Ä with A
-      .replace(/Ù/g, 'U')   // Replace Ù with U
-      .replace(/Û/g, 'U')   // Replace Û with U
-      .replace(/Ü/g, 'U')   // Replace Ü with U
-      .replace(/Î/g, 'I')   // Replace Î with I
-      .replace(/Ï/g, 'I')   // Replace Ï with I
-      .replace(/Ô/g, 'O')   // Replace Ô with O
-      .replace(/Œ/g, 'OE')  // Replace Œ with OE
-      .replace(/œ/g, 'oe')  // Replace œ with oe
-      .trim();               // Remove leading/trailing whitespace
-  };
-
-  const normalizedOriginal = normalizeWhitespace(originalText);
-  const normalizedExtracted = normalizeWhitespace(extractedText);
-
-  // Compare the normalized versions
-  const isIdentical = normalizedOriginal === normalizedExtracted;
-  console.log(`Content identical (normalized): ${isIdentical ? '✅ YES' : '❌ NO'}`);
-
-  if (!isIdentical) {
-    console.log('\n=== DIFFERENCES FOUND ===');
-    console.log('Normalized original text starts with:', normalizedOriginal.substring(0, 200));
-    console.log('Normalized extracted text starts with:', normalizedExtracted.substring(0, 200));
-    // Find the first difference
-    const minLength = Math.min(normalizedOriginal.length, normalizedExtracted.length);
-    for (let i = 0; i < minLength; i++) {
-      if (normalizedOriginal[i] !== normalizedExtracted[i]) {
-        console.log(`First difference at position ${i}:`);
-        console.log(`Original: "${normalizedOriginal.substring(i, i + 50)}"`);
-        console.log(`Extracted: "${normalizedExtracted.substring(i, i + 50)}"`);
-        break;
-      }
-    }
-  } else {
-    console.log('🎉 All content successfully extracted!');
-  }
-}
-
-function flattenDocumentContent(document: Document): string {
-  const allText: string[] = [];
-
-  function extractTextFromContent(content: (DocumentSection | RawElement)[]) {
-    for (const item of content) {
-      if (item.type === 'raw') {
-        const rawElement = item as RawElement;
-        // Extract text from HTML content
-        const $temp = cheerio.load(rawElement.content);
-        allText.push($temp('body').text());
-      } else if (item.type === 'section') {
-        const section = item as DocumentSection;
-        // Include section names to get complete content, but filter out navigation-style content
-        const sectionName = section.name.trim();
-        
-        // Always include the main document title (section 248218)
-        if (section.id === '248218') {
-          allText.push(sectionName);
-        }
-        // Filter out navigation-style content that might cause duplication
-        else if (sectionName && 
-            !sectionName.includes(' - ') && 
-            !sectionName.includes('A - ') && 
-            !sectionName.includes('B - ') && 
-            !sectionName.includes('C - ') && 
-            !sectionName.includes('D - ') && 
-            !sectionName.includes('E - ') && 
-            !sectionName.includes('F - ') && 
-            !sectionName.includes('G - ') && 
-            !sectionName.includes('H - ') && 
-            !sectionName.includes('I - ') && 
-            !sectionName.includes('J - ') && 
-            !sectionName.includes('K - ') && 
-            !sectionName.includes('L - ') && 
-            !sectionName.includes('M - ') && 
-            !sectionName.includes('N - ') && 
-            !sectionName.includes('O - ') && 
-            !sectionName.includes('P - ') && 
-            !sectionName.includes('Q - ') && 
-            !sectionName.includes('R - ') && 
-            !sectionName.includes('S - ') && 
-            !sectionName.includes('T - ') && 
-            !sectionName.includes('U - ') && 
-            !sectionName.includes('V - ') && 
-            !sectionName.includes('W - ') && 
-            !sectionName.includes('X - ') && 
-            !sectionName.includes('Y - ') && 
-            !sectionName.includes('Z - ')) {
-          allText.push(sectionName);
-        }
-        
-        extractTextFromContent(section.subsections);
-      }
-    }
-  }
-
-  extractTextFromContent(document.content);
-  
-  // Final filtering: Remove any remaining navigation-style content from the combined text
-  const combinedText = allText.join(' ');
-  
-  // Remove patterns like "A - Préambule général" that might have slipped through
-  const cleanedText = combinedText
-    .replace(/\b[A-Z] - [A-Za-zÀ-ÿ\s]+/g, '') // Remove "Letter - Title" patterns
-    .replace(/\s+/g, ' ') // Normalize whitespace
-    .trim();
-  
-  return cleanedText;
-}
-
 
 // Run if this file is executed directly
 if (require.main === module) {
-  main().catch(console.error);
+    main().catch(console.error);
 }

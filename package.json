@@ -276,6 +276,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@types/cheerio": "^0.22.35"
+    "@types/cheerio": "^0.22.35",
+    "html-format": "^1.1.7"
   }
 }
