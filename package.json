@@ -4,6 +4,7 @@
   "main": "index.js",
   "dependencies": {
     "@types/node": "^24.1.0",
+    "@types/turndown": "^5.0.5",
     "acorn": "^8.15.0",
     "acorn-jsx": "^5.3.2",
     "acorn-walk": "^8.3.4",
@@ -242,6 +243,7 @@
     "ts-api-utils": "^1.4.3",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
+    "turndown": "^7.2.1",
     "type-check": "^0.4.0",
     "type-detect": "^4.0.8",
     "type-fest": "^0.20.2",
