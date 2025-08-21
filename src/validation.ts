@@ -25,8 +25,8 @@ export function compareString(originalText: string, extractedText: string) {
         for (let i = 0; i < minLength; i++) {
             if (normalizedOriginal[i] !== normalizedExtracted[i]) {
                 console.log(`First difference at position ${i}:`);
-                console.log(`Original: "${normalizedOriginal.substring(i, i + 50)}"`);
-                console.log(`Extracted: "${normalizedExtracted.substring(i, i + 50)}"`);
+                console.log(`Original: "${normalizedOriginal.substring(i-5, i + 50)}"`);
+                console.log(`Extracted: "${normalizedExtracted.substring(i-5, i + 50)}"`);
                 break;
             }
         }

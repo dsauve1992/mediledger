@@ -20,5 +20,6 @@ export const normalizeWhitespace = (text: string): string => {
         .replace(/Ô/g, 'O')   // Replace Ô with O
         .replace(/Œ/g, 'OE')  // Replace Œ with OE
         .replace(/œ/g, 'oe')  // Replace œ with oe
+        .replace(/(\d),(\d)/g, "$1.$2") // Replace comma in numbers with dot
         .trim();               // Remove leading/trailing whitespace
 };

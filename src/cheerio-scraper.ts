@@ -58,13 +58,21 @@ function parseDocument(originalCheerioRoot: cheerio.Root) {
             if (typeof content === 'string') {
                 return content;
             } else {
-                return `${(content as any).code} ${(content as any).description} ${(content as any).value}${(content as any).extra ? ' ' + (content as any).extra : ''}`;
+                return `${(content as any).code} ${(content as any).description} ${formatAmount((content as any).amount_facility)}${(content as any).amount_cabinet ? ' ' + formatAmount((content as any).amount_cabinet) : ''}${(content as any).amount_r2 ? ' ' + (content as any).amount_r2 : ''}`;
             }
         }).join(' ') + '\n';
     }, '')
 
 
     compareString(originalContenuText, sanitizedVersionText)
+}
+
+function formatAmount(amount: number): string {
+    return amount.toLocaleString('fr-FR', {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 }
 
 
