@@ -1,9 +1,10 @@
 import * as cheerio from 'cheerio';
-import * as fs from 'fs';
-import * as path from 'path';
-import {extractNodesPreserveStructure} from "./utils";
-import * as diff from "diff";
-import TurndownService from "turndown";
+import {compareString} from "./validation";
+import {extractMenuItems, flattenMenuItems} from "./1-extract-structure-from-menu/menu-items";
+import {loadFromPath} from "./cheerio.utils";
+import {getDocumentWithMainSectionAsDirectChildren} from "./2-equalize-section-headers";
+import {extractSectionsWithContent} from "./3-group-content-by-section";
+import {sanitizeHtmlContent} from "./4-sanitize-html";
 
 interface Document {
     content: (DocumentSection | RawElement)[];
@@ -21,324 +22,51 @@ interface RawElement {
     content: string;
 }
 
-interface MenuItem {
-    name: string;
-    type: string;
-    id?: string;
-    subsections: MenuItem[];
-}
-
-interface SectionWithContent {
-    id?: string;
-    name: string;
-    content: string[];
-}
-
-// Example usage
 async function main() {
     const filePath = './src/manuel-specialistes-remuneration-acte.html';
 
-    try {
-        console.log('=== STARTING SCRAPER ===');
-        console.log(`Scraping local file: ${filePath}`);
+    console.log('=== STARTING SCRAPER ===');
+    console.log(`Scraping local file: ${filePath}`);
+    const $ = loadFromPath(filePath);
 
-        const absolutePath = path.resolve(filePath);
-        const htmlContent = fs.readFileSync(absolutePath, 'utf-8');
-        const $ = cheerio.load(htmlContent);
-
-        const document = parseDocument($);
-    } catch (error) {
-        console.error(`Error scraping local file ${filePath}:`, error);
-    }
-}
-
-function grabMainSectionsToTheRoot($: cheerio.Root, flattenedItems: MenuItem[]): string {
-    let raw = $.html()
-
-    for (const index in flattenedItems) {
-        const item = flattenedItems[index];
-        raw = extractNodesPreserveStructure(raw, '#contenu', `#${item.id!}`);
-        console.log(`Extracted content (${parseInt(index) + 1}/${flattenedItems.length}) for ID: ${item.id}`);
-    }
-
-    return raw
-}
-
-function getDocumentWithMainSectionAsDirectChildren($: cheerio.Root, flattenedItems: MenuItem[]) {
-    if (fs.existsSync('./modified-raw-content.html')) {
-        console.log('Modified raw content file already exists. Skipping reconstruction.');
-
-        return fs.readFileSync('./modified-raw-content.html', 'utf-8');
-    }
-    const modifiedContenuSection = grabMainSectionsToTheRoot($, flattenedItems);
-    fs.writeFileSync('./modified-raw-content.html', modifiedContenuSection, 'utf-8');
-
-    return modifiedContenuSection
-}
-
-function extractSectionsWithContent(modifiedCheerioRoot$: cheerio.Root, $: cheerio.Root, flattenedItems: MenuItem[]) {
-    const sectionsWithContent: SectionWithContent[] = [];
-
-    let currentSection: SectionWithContent = {id: '', name: '', content: []};
-
-    modifiedCheerioRoot$('#contenu > *').each((_, element) => {
-        const $element = $(element);
-        const id = $element.attr('id');
-        const name = $element.text().trim()
-        const content = $.html(element) || '';
-
-        if (id && flattenedItems.some(item => item.id === id)) {
-            // If we encounter a new section, push the previous one if it exists
-            if (currentSection) {
-                sectionsWithContent.push(currentSection);
-            }
-            // Start a new section
-            currentSection = {id, name, content: []};
-        } else if (currentSection) {
-            // If it's not a section but we have a current section, append content to it
-            currentSection.content.push(content);
-        }
-    })
-
-    sectionsWithContent.push(currentSection);
-
-    // save sectionsWithContent
-    fs.writeFileSync('./sectionsWithContent.json', JSON.stringify(sectionsWithContent, null, 2), 'utf-8');
-    return sectionsWithContent;
-}
-
-function normaliseContent(content:  string[]): (string|object)[] {
-    let normalizedContent: (string|object)[] = []
-
-    for (const chunk of content) {
-        const $ = cheerio.load(chunk);
-        const bodyChildren = $('body').children().toArray();
-
-        if (bodyChildren.length > 1) {
-            throw new Error('Content has more than one root element');
-        }
-
-        const child = bodyChildren[0];
-
-        if (child.type === 'text') {
-            normalizedContent.push(child.data || '');
-        } else if (child.type !== 'tag') {
-            throw new Error('Content root is not a tag element');
-        }else if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(child.name)) {
-            normalizedContent.push(normalizeWhitespace($(child).text()));
-        }else if (['ul', 'ol'].includes(child.name)) {
-            normalizedContent.push($.html(child));
-        }else if (child.name === 'table') {
-            const tableRowOrHeader = $(child).find('tr, th').toArray();
-
-            for (const row of tableRowOrHeader) {
-                const rowRegex = /^\s*(\d{5})\s+(.+?)\s+([\d.,\s]+?)\s+(\d+)?\s*$/;
-
-                //check if row matches the regex
-                const rowText = $(row).text().trim();
-                const match = rowText.match(rowRegex);
-                if (match) {
-                    const [, code, description, rawValue, rawExtra] = match;
-
-                    // Nettoyer la valeur (enlever les espaces dans "1 043,25")
-                    const value = parseFloat(rawValue.replace(/\s/g, "").replace(",", "."));
-                    const extra = rawExtra ? parseInt(rawExtra, 10) : undefined;
-
-                    normalizedContent.push({
-                        code,
-                        description: description.trim(),
-                        value,
-                        extra,
-                    } as any);
-                } else {
-                    // If it doesn't match, we can still add the raw HTML
-                    const stringifiedRow = $(row).text().trim();
-                    if (stringifiedRow)  {
-                        normalizedContent.push(normalizeWhitespace(stringifiedRow));
-                    }
-                }
-            }
-
-        }
-            else {
-            normalizedContent = normalizedContent.concat(normaliseContent($(child).children().toArray().map(c => $.html(c) || '')));
-        }
-    }
-
-    return normalizedContent
+    parseDocument($);
 }
 
 function parseDocument(originalCheerioRoot: cheerio.Root) {
-    const menuGauche = originalCheerioRoot('#menuGauche');
-    if (!menuGauche.length) {
-        console.log('No #menuGauche found in document');
-        return {content: []};
-    }
-
-    // Find the main navigation ul
-    const navUl = menuGauche.find('#nav');
-    if (!navUl.length) {
-        console.log('No #nav found in menuGauche');
-        return {content: []};
-    }
-
-    const menuItems = parseMenuList(originalCheerioRoot, navUl, 1);
-
-    // Step 1: Flatten the menuItems list
-    const flattenedItems = flattenMenuItems(menuItems);
-    const modifiedDocument = getDocumentWithMainSectionAsDirectChildren(originalCheerioRoot, flattenedItems);
-
-
-    // Step 2: extract content for each main section and its subsections
-    // since every section is now a direct child of #contenu, we can just extract the content between sections and affect that content the previous section. we also have to handle the content before the first section
-    const modifiedRoot$ = cheerio.load(modifiedDocument);
-    const sectionsWithContent = extractSectionsWithContent(modifiedRoot$, originalCheerioRoot, flattenedItems);
-
-    // Step 3: sanitize the content
-    const modified = sectionsWithContent.map(section => {
-        return {
-            ...section,
-            content:normaliseContent(section.content)
-        }
-    });
-
-    fs.writeFileSync('./modified-content.json', JSON.stringify(modified, null, 2), 'utf-8');
-
-    const sectionWithContentText = sectionsWithContent.reduce((acc, section) => {
-        return acc + section.name + '\n' + cheerio.load(section.content.join('')).root().text() + '\n';
-    }, '')
-
     const originalContenuText = getContenuString(originalCheerioRoot)
 
-    compareString(originalContenuText, sectionWithContentText)
-}
+    const menuItems = extractMenuItems(originalCheerioRoot);
+    const flattenedItems = flattenMenuItems(menuItems);
 
-function parseMenuList($: cheerio.Root, $ul: cheerio.Cheerio, level: number): MenuItem[] {
-    const menuItems: MenuItem[] = [];
+    const modifiedDocument = getDocumentWithMainSectionAsDirectChildren(originalCheerioRoot, flattenedItems);
+    console.log('Validate step 1')
+    compareString(originalContenuText, getContenuString(cheerio.load(modifiedDocument)));
 
-    $ul.children('li').each((_, liElement) => {
-        const $li = $(liElement);
-        const $link = $li.children('a').first();
+    const sectionsWithContent = extractSectionsWithContent(cheerio.load(modifiedDocument), originalCheerioRoot, flattenedItems);
 
-        if ($link.length) {
-            const text = $link.text().trim();
-            const href = $link.attr('href');
-            // Extract just the ID number from the href (e.g., "248224" from the full URL)
-            const id = href ? href.split('#').pop() || undefined : undefined;
+    const sectionWithContentText = sectionsWithContent.reduce((acc, section) => {
+        return acc + section.name + '\n' + cheerio.load(section.content.join(' ')).root().text() + '\n';
+    }, '')
 
-            if (text) {
-                const menuItem: MenuItem = {
-                    name: text,
-                    type: `level${level}`,
-                    id: id,
-                    subsections: []
-                };
+    console.log('Validate step 2')
+    compareString(originalContenuText, sectionWithContentText);
 
-                // Check if this item has nested subsections
-                const $nestedUl = $li.children('ul');
-                if ($nestedUl.length) {
-                    menuItem.subsections = parseMenuList($, $nestedUl, level + 1);
-                }
 
-                menuItems.push(menuItem);
+    const sanitizedVersion = sanitizeHtmlContent(sectionsWithContent);
+    const sanitizedVersionText = sanitizedVersion.reduce((acc, section) => {
+        return acc + section.name + ' ' + section.content.map(content => {
+            if (typeof content === 'string') {
+                return content;
+            } else {
+                return `${(content as any).code} ${(content as any).description} ${(content as any).value}${(content as any).extra ? ' ' + (content as any).extra : ''}`;
             }
-        }
-    });
+        }).join(' ') + '\n';
+    }, '')
 
-    return menuItems;
+
+    compareString(originalContenuText, sanitizedVersionText)
 }
 
-function flattenMenuItems(menuItems: MenuItem[]): MenuItem[] {
-    const flattened: MenuItem[] = [];
-
-    function flattenRecursive(items: MenuItem[]) {
-        for (const item of items) {
-            // Add the current item (without subsections)
-            const flatItem: MenuItem = {
-                name: item.name,
-                type: item.type,
-                id: item.id,
-                subsections: []
-            };
-            flattened.push(flatItem);
-
-            // Recursively flatten subsections
-            if (item.subsections.length > 0) {
-                flattenRecursive(item.subsections);
-            }
-        }
-    }
-
-    flattenRecursive(menuItems);
-    return flattened;
-}
-
-const normalizeWhitespace = (text: string): string => {
-    return text
-        .replace(/\s+/g, '')  // Replace multiple whitespace with single space
-        .replace(/\n+/g, ' ')   // Replace newlines with spaces
-        .replace(/\t/g, ' ')   // Replace tabs with spaces
-        .replace(/—/g, '-')    // Replace em dash with regular dash
-        .replace(/"/g, '"')    // Replace smart quotes with regular quotes
-        .replace(/È/g, 'E')   // Replace È with E
-        .replace(/É/g, 'E')   // Replace É with E
-        .replace(/Ê/g, 'E')   // Replace Ê with E
-        .replace(/Ë/g, 'E')   // Replace Ë with E
-        .replace(/À/g, 'A')   // Replace À with A
-        .replace(/Â/g, 'A')   // Replace Â with A
-        .replace(/Ä/g, 'A')   // Replace Ä with A
-        .replace(/Ù/g, 'U')   // Replace Ù with U
-        .replace(/Û/g, 'U')   // Replace Û with U
-        .replace(/Ü/g, 'U')   // Replace Ü with U
-        .replace(/Î/g, 'I')   // Replace Î with I
-        .replace(/Ï/g, 'I')   // Replace Ï with I
-        .replace(/Ô/g, 'O')   // Replace Ô with O
-        .replace(/Œ/g, 'OE')  // Replace Œ with OE
-        .replace(/œ/g, 'oe')  // Replace œ with oe
-        .trim();               // Remove leading/trailing whitespace
-};
-
-
-
-function compareString(originalText: string, extractedText: string) {
-
-    const normalizedOriginal = normalizeWhitespace(originalText);
-    const normalizedExtracted = normalizeWhitespace(extractedText);
- 
-    // Compare the normalized versions
-    const isIdentical = isTextEqualIgnoringWhitespace(normalizedOriginal, normalizedExtracted);
-    console.log(`Content identical (normalized): ${isIdentical ? '✅ YES' : '❌ NO'}`);
-
-    if (!isIdentical) {
-        console.log('\n=== DIFFERENCES FOUND ===');
-        console.log('Normalized original text starts with:', normalizedOriginal.substring(0, 200));
-        console.log('Normalized extracted text starts with:', normalizedExtracted.substring(0, 200));
-        // Find the first difference
-        const minLength = Math.min(normalizedOriginal.length, normalizedExtracted.length);
-        for (let i = 0; i < minLength; i++) {
-            if (normalizedOriginal[i] !== normalizedExtracted[i]) {
-                console.log(`First difference at position ${i}:`);
-                console.log(`Original: "${normalizedOriginal.substring(i, i + 50)}"`);
-                console.log(`Extracted: "${normalizedExtracted.substring(i, i + 50)}"`);
-                break;
-            }
-        }
-    } else {
-        console.log('🎉 All content successfully extracted!');
-    }
-}
-
-function isTextEqualIgnoringWhitespace(a: string, b: string): boolean {
-    const changes = diff.diffWords(a, b);
-
-    // If any change is an addition or removal with non-whitespace chars → not equal
-    return changes.every(change => {
-        if (change.added || change.removed) {
-            return change.value.trim().length < 2; // allow pure whitespace diffs
-        }
-        return true;
-    });
-}
 
 function getContenuString($: cheerio.Root) {
     const originalContenuNode = $('#contenu');

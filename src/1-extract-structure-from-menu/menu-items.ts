@@ -1,0 +1,81 @@
+export interface MenuItem {
+    name: string;
+    type: string;
+    id?: string;
+    subsections: MenuItem[];
+}
+
+export function extractMenuItems(originalCheerioRoot: cheerio.Root) {
+    const menuGauche = originalCheerioRoot('#menuGauche');
+    if (!menuGauche.length) {
+        throw new Error('No #menuGauche found in document');
+    }
+
+    // Find the main navigation ul
+    const navUl = menuGauche.find('#nav');
+    if (!navUl.length) {
+        new Error('No #nav found in menuGauche');
+    }
+
+    return parseMenuList(originalCheerioRoot, navUl, 1);
+}
+
+function parseMenuList($: cheerio.Root, $ul: cheerio.Cheerio, level: number): MenuItem[] {
+    const menuItems: MenuItem[] = [];
+
+    $ul.children('li').each((_, liElement) => {
+        const $li = $(liElement);
+        const $link = $li.children('a').first();
+
+        if ($link.length) {
+            const text = $link.text().trim();
+            const href = $link.attr('href');
+            // Extract just the ID number from the href (e.g., "248224" from the full URL)
+            const id = href ? href.split('#').pop() || undefined : undefined;
+
+            if (text) {
+                const menuItem: MenuItem = {
+                    name: text,
+                    type: `level${level}`,
+                    id: id,
+                    subsections: []
+                };
+
+                // Check if this item has nested subsections
+                const $nestedUl = $li.children('ul');
+                if ($nestedUl.length) {
+                    menuItem.subsections = parseMenuList($, $nestedUl, level + 1);
+                }
+
+                menuItems.push(menuItem);
+            }
+        }
+    });
+
+    return menuItems;
+}
+
+export function flattenMenuItems(menuItems: MenuItem[]): MenuItem[] {
+    const flattened: MenuItem[] = [];
+
+    function flattenRecursive(items: MenuItem[]) {
+        for (const item of items) {
+            // Add the current item (without subsections)
+            const flatItem: MenuItem = {
+                name: item.name,
+                type: item.type,
+                id: item.id,
+                subsections: []
+            };
+            flattened.push(flatItem);
+
+            // Recursively flatten subsections
+            if (item.subsections.length > 0) {
+                flattenRecursive(item.subsections);
+            }
+        }
+    }
+
+    flattenRecursive(menuItems);
+    return flattened;
+}
