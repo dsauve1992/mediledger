@@ -5,6 +5,14 @@ export interface MenuItem {
     subsections: MenuItem[];
 }
 
+export interface FlattenedMenuItem {
+    name: string;
+    type: string;
+    id?: string;
+    parentId: string | null;
+    subsections: MenuItem[];
+}
+
 export function extractMenuItems(originalCheerioRoot: cheerio.Root) {
     const menuGauche = originalCheerioRoot('#menuGauche');
     if (!menuGauche.length) {
@@ -55,27 +63,28 @@ function parseMenuList($: cheerio.Root, $ul: cheerio.Cheerio, level: number): Me
     return menuItems;
 }
 
-export function flattenMenuItems(menuItems: MenuItem[]): MenuItem[] {
-    const flattened: MenuItem[] = [];
+export function flattenMenuItems(menuItems: MenuItem[]): FlattenedMenuItem[] {
+    const flattened: FlattenedMenuItem[] = [];
 
-    function flattenRecursive(items: MenuItem[]) {
+    function flattenRecursive(parentId: string | null, items: MenuItem[]) {
         for (const item of items) {
             // Add the current item (without subsections)
-            const flatItem: MenuItem = {
+            const flatItem: FlattenedMenuItem = {
                 name: item.name,
                 type: item.type,
                 id: item.id,
+                parentId,
                 subsections: []
             };
             flattened.push(flatItem);
 
             // Recursively flatten subsections
             if (item.subsections.length > 0) {
-                flattenRecursive(item.subsections);
+                flattenRecursive(item.id ?? null, item.subsections);
             }
         }
     }
 
-    flattenRecursive(menuItems);
+    flattenRecursive(null, menuItems);
     return flattened;
 }
