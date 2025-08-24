@@ -63,8 +63,8 @@ function parseDocument(originalCheerioRoot: cheerio.Root) {
         }).join(' ') + '\n';
     }, '')
 
-
-    compareString(sectionWithContentText, sanitizedVersionText)
+    console.log('Validate step 3')
+    compareString(sectionWithContentText, sanitizedVersionText, true)
 }
 
 function formatAmount(amount: number): string {

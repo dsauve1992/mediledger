@@ -7,10 +7,15 @@ export function isTextEqualIgnoringWhitespace(a: string, b: string): boolean {
     return !changes.some(change => change.added || change.removed);
 }
 
-export function compareString(originalText: string, extractedText: string) {
+export function compareString(originalText: string, extractedText: string, removeWhitespaces = true) {
 
-    const normalizedOriginal = normalizeWhitespace(originalText);
-    const normalizedExtracted = normalizeWhitespace(extractedText);
+    let normalizedOriginal = normalizeWhitespace(originalText);
+    let normalizedExtracted = normalizeWhitespace(extractedText);
+    
+    if (removeWhitespaces) {
+        normalizedOriginal = normalizedOriginal.replace(/\s+/g, '');
+        normalizedExtracted = normalizedExtracted.replace(/\s+/g, '');
+    }
 
     // Compare the normalized versions
     const isIdentical = normalizedOriginal === normalizedExtracted

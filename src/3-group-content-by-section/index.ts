@@ -14,7 +14,7 @@ export interface SectionWithNormalizedContent {
     content: (string | object)[];
 }
 
-export function extractSectionsWithContent(modifiedCheerioRoot$: cheerio.Root, $: cheerio.Root, flattenedItems: MenuItem[]) {
+export function extractSectionsWithContent(modifiedCheerioRoot$: cheerio.Root, $: cheerio.Root, flattenedItems: MenuItem[]): SectionWithContent[] {
     if (fs.existsSync('./sectionsWithContent.json')) {
         return JSON.parse(fs.readFileSync('./sectionsWithContent.json', "utf-8"));
     }
