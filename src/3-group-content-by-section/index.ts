@@ -8,7 +8,17 @@ export interface SectionWithContent {
     content: string[];
 }
 
+export interface SectionWithNormalizedContent {
+    id?: string;
+    name: string;
+    content: (string | object)[];
+}
+
 export function extractSectionsWithContent(modifiedCheerioRoot$: cheerio.Root, $: cheerio.Root, flattenedItems: MenuItem[]) {
+    if (fs.existsSync('./sectionsWithContent.json')) {
+        return JSON.parse(fs.readFileSync('./sectionsWithContent.json', "utf-8"));
+    }
+
     const sectionsWithContent: SectionWithContent[] = [];
 
     let currentSection: SectionWithContent = {id: '', name: '', content: []};
@@ -16,7 +26,7 @@ export function extractSectionsWithContent(modifiedCheerioRoot$: cheerio.Root, $
     modifiedCheerioRoot$('#contenu > *').each((_, element) => {
         const $element = $(element);
         const id = $element.attr('id');
-        const name = $element.text().trim()
+        const name = $element.text()
         const content = $.html(element) || '';
 
         if (id && flattenedItems.some(item => item.id === id)) {

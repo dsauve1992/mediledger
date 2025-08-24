@@ -53,7 +53,7 @@ function parseDocument(originalCheerioRoot: cheerio.Root) {
 
 
     const sanitizedVersion = sanitizeHtmlContent(sectionsWithContent);
-    const sanitizedVersionText = sanitizedVersion.reduce((acc, section) => {
+    const sanitizedVersionText = sanitizedVersion.reduce((acc:string, section) => {
         return acc + section.name + ' ' + section.content.map(content => {
             if (typeof content === 'string') {
                 return content;
@@ -64,7 +64,7 @@ function parseDocument(originalCheerioRoot: cheerio.Root) {
     }, '')
 
 
-    compareString(originalContenuText, sanitizedVersionText)
+    compareString(sectionWithContentText, sanitizedVersionText)
 }
 
 function formatAmount(amount: number): string {

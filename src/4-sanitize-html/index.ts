@@ -1,10 +1,14 @@
-import {SectionWithContent} from "../3-group-content-by-section";
+import {SectionWithContent, SectionWithNormalizedContent} from "../3-group-content-by-section";
 import fs from "fs";
 import * as cheerio from "cheerio";
 import {normalizeWhitespace} from "../normalize-whitespace";
 
-export function sanitizeHtmlContent(sectionsWithContent: SectionWithContent[]) {
-    const modified = sectionsWithContent.map(section => {
+export function sanitizeHtmlContent(sectionsWithContent: SectionWithContent[]): SectionWithNormalizedContent[] {
+    if (fs.existsSync('./modified-content.json')) {
+        return JSON.parse(fs.readFileSync('./modified-content.json', 'utf-8'));
+    }
+
+    const modified: SectionWithNormalizedContent[] = sectionsWithContent.map(section => {
         return {
             ...section,
             content: normaliseContent(section.content)
@@ -35,10 +39,8 @@ function normaliseContent(content: string[]): (string | object)[] {
             normalizedContent.push(child.data || '');
         } else if (child.type !== 'tag') {
             throw new Error('Content root is not a tag element');
-        } else if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(child.name)) {
+        } else if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li'].includes(child.name)) {
             normalizedContent.push(normalizeWhitespace($(child).text()));
-        } else if (['ul', 'ol'].includes(child.name)) {
-            normalizedContent.push($.html(child));
         } else if (child.name === 'table') {
 
             const tableRowOrHeader = $(child)
