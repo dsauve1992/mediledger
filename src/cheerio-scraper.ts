@@ -5,6 +5,7 @@ import {loadFromPath} from "./cheerio.utils";
 import {getDocumentWithMainSectionAsDirectChildren} from "./2-equalize-section-headers";
 import {extractSectionsWithContent} from "./3-group-content-by-section";
 import {sanitizeHtmlContent} from "./4-sanitize-html";
+import {foo} from "./4-split-large-sections";
 
 interface Document {
     content: (DocumentSection | RawElement)[];
@@ -42,7 +43,9 @@ function parseDocument(originalCheerioRoot: cheerio.Root) {
     console.log('Validate step 1')
     compareString(originalContenuText, getContenuString(cheerio.load(modifiedDocument)));
 
-    const sectionsWithContent = extractSectionsWithContent(cheerio.load(modifiedDocument), originalCheerioRoot, flattenedItems);
+    const sectionsWithContent = extractSectionsWithContent(cheerio.load(modifiedDocument), flattenedItems);
+
+    // foo(sectionsWithContent)
 
     const sectionWithContentText = sectionsWithContent.reduce((acc, section) => {
         return acc + section.name + '\n' + cheerio.load(section.content.join(' ')).root().text() + '\n';
@@ -51,6 +54,7 @@ function parseDocument(originalCheerioRoot: cheerio.Root) {
     console.log('Validate step 2')
     compareString(originalContenuText, sectionWithContentText);
 
+    foo(sectionsWithContent)
 
     const sanitizedVersion = sanitizeHtmlContent(sectionsWithContent);
     const sanitizedVersionText = sanitizedVersion.reduce((acc:string, section) => {

@@ -1,3 +1,5 @@
+import fs from "fs";
+
 export interface MenuItem {
     name: string;
     type: string;
@@ -10,7 +12,6 @@ export interface FlattenedMenuItem {
     type: string;
     id?: string;
     parentId: string | null;
-    subsections: MenuItem[];
 }
 
 export function extractMenuItems(originalCheerioRoot: cheerio.Root) {
@@ -25,7 +26,11 @@ export function extractMenuItems(originalCheerioRoot: cheerio.Root) {
         new Error('No #nav found in menuGauche');
     }
 
-    return parseMenuList(originalCheerioRoot, navUl, 1);
+    const menu = parseMenuList(originalCheerioRoot, navUl, 1);
+
+    fs.writeFileSync('./menu.json', JSON.stringify(menu, null, 2), 'utf-8');
+
+    return menu;
 }
 
 function parseMenuList($: cheerio.Root, $ul: cheerio.Cheerio, level: number): MenuItem[] {
@@ -74,7 +79,6 @@ export function flattenMenuItems(menuItems: MenuItem[]): FlattenedMenuItem[] {
                 type: item.type,
                 id: item.id,
                 parentId,
-                subsections: []
             };
             flattened.push(flatItem);
 

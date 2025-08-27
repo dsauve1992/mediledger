@@ -1,9 +1,9 @@
 import cheerio from "cheerio";
-import {MenuItem} from "../1-extract-structure-from-menu/menu-items";
+import {FlattenedMenuItem, MenuItem} from "../1-extract-structure-from-menu/menu-items";
 import fs from "fs";
-import {extractNodesPreserveStructure} from "./utils";
+import {promoteElementToAncestor} from "./utils";
 
-export function getDocumentWithMainSectionAsDirectChildren($: cheerio.Root, flattenedItems: MenuItem[]) {
+export function getDocumentWithMainSectionAsDirectChildren($: cheerio.Root, flattenedItems: FlattenedMenuItem[]) {
     if (fs.existsSync('./modified-raw-content.html')) {
         console.log('Modified raw content file already exists. Skipping reconstruction.');
 
@@ -15,14 +15,17 @@ export function getDocumentWithMainSectionAsDirectChildren($: cheerio.Root, flat
     return modifiedContenuSection
 }
 
-function grabMainSectionsToTheRoot($: cheerio.Root, flattenedItems: MenuItem[]): string {
-    let raw = $.html()
+function grabMainSectionsToTheRoot(
+    $: cheerio.Root,
+    flattenedItems: FlattenedMenuItem[]
+): string {
+    for (const [i, item] of flattenedItems.entries()) {
+        console.log(
+            `Extracted content (${i + 1}/${flattenedItems.length}) \t ${item.name} \t (ID: ${item.id})`
+        );
 
-    for (const index in flattenedItems) {
-        const item = flattenedItems[index];
-        raw = extractNodesPreserveStructure(raw, '#contenu', `#${item.id!}`);
-        console.log(`Extracted content (${parseInt(index) + 1}/${flattenedItems.length}) for ID: ${item.id}`);
+        promoteElementToAncestor($, `#${item.id}`, "#contenu", 'div', 'medi-ledger-section');
     }
 
-    return raw
+    return $.html();
 }

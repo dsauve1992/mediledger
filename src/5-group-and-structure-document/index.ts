@@ -32,6 +32,8 @@ interface Rule {
 }
 
 interface Section {
+    "id": string,
+    "parentId": string,
     name: string;
     content: (string | CodeActe)[];
 }
