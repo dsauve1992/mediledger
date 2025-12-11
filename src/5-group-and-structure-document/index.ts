@@ -15,19 +15,21 @@ interface CodeActe {
     amount_cabinet?: number;
 }
 
-interface SubRule {
-    id: string;
-    text: string;
-    conditions?: string[];
-    avis?: string[];
-    codes?: CodeActe[];
-}
+type Document = { name: string; rules: Rule[] }[]
 
 interface Rule {
     id: string;
     title: string;
     description?: string;
     subrules?: SubRule[];
+    codes?: CodeActe[];
+}
+
+interface SubRule {
+    id: string;
+    text: string;
+    conditions?: string[];
+    avis?: string[];
     codes?: CodeActe[];
 }
 
@@ -55,45 +57,90 @@ const sections: Section[] = JSON.parse(rawData);
 
 // Prompt pour structurer une section
 const promptTemplate = `
-Tu es un expert en analyse de documents de tarification médicale.
-Tu reçois une section d'un manuel RAMQ sous forme JSON, par exemple :
+Tu es un expert en tarification médicale RAMQ et en extraction d’informations structurées. 
+Ta tâche : transformer une section brute (mélange de texte et d’objets code) en un ARRAY JSON de "rules" **strictement valide** et **normalisée pour facturation**.
 
+## Entrée
+Voici la section au format JSON:
 {sectionJSON}
 
-Transforme le contenu en un array de "rules" structurées de la manière suivante :
+## Objectif
+Produis un ARRAY JSON (et rien d’autre que ce JSON) contenant des "rules" regroupées de façon logique pour la facturation (une règle = un thème/cohérence métier). 
+N’invente rien. Si une info manque, omets le champ. 
+**Tu dois agréger :**
+- Conditions de facturation et périmètres (ex.: hospitalisé/externe/cabinet, “par jour, par patient”, “1er jour”, “2e au 10e jour”, “maximum 1 fois/mois”, etc.)
+- AVIS / NOTE / renvois à une règle RAMQ ou annexe (conserve le texte exact)
+- Codes d’actes (code, description, montants)
+- Regroupements hiérarchiques (règle → sous-règles) quand le texte l’implique (titres, intertitres, sections “Cabinet privé :”, “Externe”, “AVEC PRISE EN CHARGE…”)
+
+## Filtrage (important)
+Ne retiens **que** l’information pertinente à une application de **facturation médicale** :
+- GARDER : codes, descriptions d’actes, montants (et leur contexte: facility/cabinet/r2), conditions d’admissibilité/quantification (“par jour”, “premières 24h”, intervalles de jours, patient hospitalisé/externe, etc.), limites et fréquences, exigences de traçabilité (heure d’entrée/sortie), AVIS/NOTE applicables à la facturation, références à d’autres règles/annexes (en les listant).
+- ÉCARTER : éléments narratifs non prescriptifs, redondances sans impact de facturation. Si un texte apporte juste un contexte clinique sans impact de facturation, ne le garder que s’il restreint l’admissibilité (ex.: “intubé et sous ventilation mécanique”).
+
+## Normalisation attendue
+- **Montants** : place-les dans \`amount_facility\`, \`amount_cabinet\`, \`amount_r2\` quand explicitement présents. Ne convertis pas la devise, ne calcule rien. Ne déduis pas un montant absent.
+- **Phrases typiques** :
+  - Lignes “AVIS : …” ⇒ mets le texte exact dans \`avis\`.
+  - Lignes “NOTE : …” ⇒ mets le texte exact dans \`notes\`.
+  - En-têtes/sections (“Cabinet privé :”, “Externe”, “AVEC PRISE EN CHARGE …”) ⇒ si elles structurent des conditions, crée une \`subrule\` dédiée avec \`text\` décrivant le périmètre (ex.: \`text: "Cabinet privé"\`), et insère-y les codes/conditions qui suivent jusqu’au prochain changement de périmètre.
+  - Lignes avec montant SANS code (ex.: “---- Supplément de consultation 78.15”) ⇒ conserve-les en \`subrules\` (dans \`text\`) avec le montant **dans le texte**. **Ne crée pas de code artificiel.**
+  - Intervalles/quantificateurs (“1er jour”, “2e au 10e jour”, “par jour”, “premières 24 heures”) ⇒ mets-les dans \`conditions\`.
+  - Références (“Voir la Règle d'application no 21”, “Voir l’Annexe 29”) ⇒ ajoute les textes exacts dans \`references\` (array de strings).
+
+## Schéma de sortie (types cibles)
 [
   {{
-    id: "6",
-    title: "Titre de la règle",
-    description: "Description générale",
-    subrules: [
+    "id": "string",                      // Identifiant local libre (ex.: "6", "6.1"); ne pas inventer de sémantique
+    "title": "string",                   // Titre concis de la règle (déduit d’un en-tête ou d’un thème clair)
+    "description": "string",             // Résumé utile à la facturation (optionnel)
+    "references": ["string"],            // Renvois à règles/annexes (texte exact)
+    "avis": ["string"],                  // Liste des AVIS exacts
+    "notes": ["string"],                 // Liste des NOTE exactes
+    "subrules": [
       {{
-        id: "6.1",
-        text: "Texte de la sous-règle",
-        conditions: ["liste des conditions"],
-        avis: ["liste des AVIS"],
-        codes: [
+        "id": "string",
+        "text": "string",                // Texte de sous-règle (intitulé, périmètre, précision)
+        "conditions": ["string"],        // Contraintes, unités, intervalles (“par jour”, “1er jour”...)
+        "avis": ["string"],
+        "notes": ["string"],
+        "references": ["string"],
+        "codes": [
           {{
-            code: "06058",
-            description: "Description de l'acte",
-            amount_facility: 211.1,
-            amount_r2: 4
+            "code": "string",
+            "description": "string",
+            "amount_facility": number,
+            "amount_r2": number,
+            "amount_cabinet": number
           }}
         ]
       }}
     ],
-    codes: [
+    "codes": [
       {{
-        code: "06058",
-        description: "Description de l'acte",
-        amount_facility: 211.1
+        "code": "string",
+        "description": "string",
+        "amount_facility": number,
+        "amount_r2": number,
+        "amount_cabinet": number
       }}
     ]
   }}
 ]
 
-Ne crée pas de règles ou sous-règles qui n'existent pas. Si certaines informations n’existent pas, laisse le champ vide ou absent.
-Répond strictement en JSON valide.
+## Règles de grouping (très important)
+- Si une zone (ex.: “Externe”) contient plusieurs éléments (avis, conditions, codes), crée **une seule** \`subrule\` pour ce périmètre et imbrique dedans ce qui suit, jusqu’au prochain changement de périmètre.
+- Si une condition s’applique à plusieurs codes (ex.: “par jour, par patient”), la placer **une seule fois** au niveau de la \`subrule\` correspondante.
+- Les soins spécifiques (ex.: “Soins neurochirurgicaux pour traumatisme…”) deviennent des \`subrules\` distinctes si leurs conditions/éligibilités diffèrent.
+
+## Exemples brefs de mapping (indicatifs)
+- “AVIS : … Voir la Règle …” → \`avis\` + \`references\`.
+- “par jour, par patient” → \`conditions: ["par jour, par patient"]\`
+- “09098 chaque jour subséquent … Annexe 29” (sans objet code) → reste en \`subrules[].text\` et \`references\`, pas de \`codes\`.
+
+## Sortie attendue
+- Réponds **strictement** par un **ARRAY JSON valide** (UTF-8), **sans** texte additionnel, **sans** commentaires, **sans** trailing commas.
+- N’inclus pas de champs vides avec \`null\` ; omets-les simplement.
 `;
 
 
