@@ -1,0 +1,2399 @@
+[
+  {
+    "name": "Frais de déplacement et de séjour",
+    "type": "level1",
+    "id": "248219",
+    "subsections": []
+  },
+  {
+    "name": "Règles d'application et plafonnements",
+    "type": "level1",
+    "id": "248220",
+    "subsections": []
+  },
+  {
+    "name": "Dispositions tarifaires - (Médecins spécialistes) - Accord-cadre du 1er octobre 1995",
+    "type": "level1",
+    "id": "248221",
+    "subsections": []
+  },
+  {
+    "name": "A - Préambule général",
+    "type": "level1",
+    "id": "248224",
+    "subsections": [
+      {
+        "name": "R1 - Paiement",
+        "type": "level2",
+        "id": "126639",
+        "subsections": []
+      },
+      {
+        "name": "R2 - Frais de pratique",
+        "type": "level2",
+        "id": "126640",
+        "subsections": []
+      },
+      {
+        "name": "R3 - Enseignement clinique",
+        "type": "level2",
+        "id": "126665",
+        "subsections": []
+      },
+      {
+        "name": "R4 - Tarification nouvelle",
+        "type": "level2",
+        "id": "126666",
+        "subsections": []
+      },
+      {
+        "name": "R5 - Visite",
+        "type": "level2",
+        "id": "126667",
+        "subsections": []
+      },
+      {
+        "name": "R6 - Malade dirigé",
+        "type": "level2",
+        "id": "126668",
+        "subsections": []
+      },
+      {
+        "name": "R7 - Thérapie de communication",
+        "type": "level2",
+        "id": "126669",
+        "subsections": []
+      },
+      {
+        "name": "R8 - Procédures diagnostiques et thérapeutiques",
+        "type": "level2",
+        "id": "126670",
+        "subsections": []
+      },
+      {
+        "name": "R9 - Surveillance",
+        "type": "level2",
+        "id": "126671",
+        "subsections": []
+      },
+      {
+        "name": "R10 - Soins simultanés",
+        "type": "level2",
+        "id": "126672",
+        "subsections": []
+      },
+      {
+        "name": "R11 - Réanimation cardio-respiratoire",
+        "type": "level2",
+        "id": "126673",
+        "subsections": []
+      },
+      {
+        "name": "R12 - Honoraire global",
+        "type": "level2",
+        "id": "126674",
+        "subsections": []
+      },
+      {
+        "name": "R13 - Remboursement des frais de déplacement",
+        "type": "level2",
+        "id": "126675",
+        "subsections": []
+      },
+      {
+        "name": "R14 - Soins d'urgence",
+        "type": "level2",
+        "id": "126676",
+        "subsections": []
+      },
+      {
+        "name": "R15 - Tournée des malades le week-end",
+        "type": "level2",
+        "id": "126677",
+        "subsections": []
+      },
+      {
+        "name": "R16 - Honoraire additionnel",
+        "type": "level2",
+        "id": "126698",
+        "subsections": []
+      },
+      {
+        "name": "R17 - Tarif de la pratique en établissement",
+        "type": "level2",
+        "id": "126702",
+        "subsections": []
+      },
+      {
+        "name": "R18 - Visite à domicile",
+        "type": "level2",
+        "id": "126703",
+        "subsections": []
+      },
+      {
+        "name": "R19 - Rapports médicaux",
+        "type": "level2",
+        "id": "126704",
+        "subsections": []
+      },
+      {
+        "name": "R20 - Déclaration de décès",
+        "type": "level2",
+        "id": "126705",
+        "subsections": []
+      },
+      {
+        "name": "R21 - Classification",
+        "type": "level2",
+        "id": "126706",
+        "subsections": []
+      },
+      {
+        "name": "R22 - Pratique hors discipline",
+        "type": "level2",
+        "id": "126707",
+        "subsections": []
+      },
+      {
+        "name": "R23 - Visites, procédés et chirurgie pédiatriques",
+        "type": "level2",
+        "id": "126708",
+        "subsections": []
+      },
+      {
+        "name": "R24 - Visites, procédés et chirurgies en ophtalmologie",
+        "type": "level2",
+        "id": "126709",
+        "subsections": []
+      },
+      {
+        "name": "R25 - Visites, procédés et chirurgies en oto-rhino-laryngologie",
+        "type": "level2",
+        "id": "126710",
+        "subsections": []
+      },
+      {
+        "name": "R26 - Visite d'un malade atteint d'un cancer",
+        "type": "level2",
+        "id": "126711",
+        "subsections": []
+      },
+      {
+        "name": "R27 - Procédés et chirurgies en urologie",
+        "type": "level2",
+        "id": "214740",
+        "subsections": []
+      },
+      {
+        "name": "R28 - Sédation-analgésie, bloc veineux ou bloc régional",
+        "type": "level2",
+        "id": "126713",
+        "subsections": []
+      },
+      {
+        "name": "R29 - Majoration pour certaines pathologies",
+        "type": "level2",
+        "id": "126714",
+        "subsections": []
+      },
+      {
+        "name": "R30 - Visites, procédés et chirurgies en chirurgie orthopédique",
+        "type": "level2",
+        "id": "126715",
+        "subsections": []
+      },
+      {
+        "name": "R31 - Visites, procédés et chirurgies en neurochirurgie",
+        "type": "level2",
+        "id": "126716",
+        "subsections": []
+      },
+      {
+        "name": "R32 - Visites et procédés diagnostiques et thérapeutiques en hématologie-oncologie médicale",
+        "type": "level2",
+        "id": "126717",
+        "subsections": []
+      },
+      {
+        "name": "R33 - Constat de décès à distance",
+        "type": "level2",
+        "id": "126718",
+        "subsections": []
+      },
+      {
+        "name": "R34 - Réunion clinique multidisciplinaire",
+        "type": "level2",
+        "id": "126719",
+        "subsections": []
+      },
+      {
+        "name": "R35 - Communication par l'intermédiaire d'un interprète",
+        "type": "level2",
+        "id": "126721",
+        "subsections": []
+      },
+      {
+        "name": "R36 - Intervention clinique à la suite d'une demande d'aide médicale à mourir",
+        "type": "level2",
+        "id": "126740",
+        "subsections": []
+      },
+      {
+        "name": "R37 - Gestion des médicaments (médecin accompagnateur)",
+        "type": "level2",
+        "id": "214709",
+        "subsections": []
+      },
+      {
+        "name": "R38 - Formulaire de déclaration de l'administration d'aide médicale à mourir",
+        "type": "level2",
+        "id": "214729",
+        "subsections": []
+      },
+      {
+        "name": "R39 - Avis d'un second médecin sur le respect des conditions pour obtenir l'aide médicale à mourir",
+        "type": "level2",
+        "id": "214730",
+        "subsections": []
+      },
+      {
+        "name": "R40 - Formulaire de déclaration de la sédation palliative continue",
+        "type": "level2",
+        "id": "214731",
+        "subsections": []
+      },
+      {
+        "name": "R41 - Supplément d'honoraires de plateau technique",
+        "type": "level2",
+        "id": "214732",
+        "subsections": [
+          {
+            "name": "Annexe 1",
+            "type": "level3",
+            "id": "220089",
+            "subsections": []
+          }
+        ]
+      },
+      {
+        "name": "R42 - Tarification de certains services en physiatrie",
+        "type": "level2",
+        "id": "231393",
+        "subsections": []
+      },
+      {
+        "name": "Services et examens médicaux considérés comme assurés en conformité avec l'article 22 a) ii",
+        "type": "level2",
+        "id": "113718",
+        "subsections": []
+      },
+      {
+        "name": "Services et examens médicaux considérés comme assurés en conformité avec l'article 22 f)",
+        "type": "level2",
+        "id": "113719",
+        "subsections": []
+      },
+      {
+        "name": "Demande d'autorisation d'hospitalisation hors du Canada pour des services médicaux qui ne sont pas disponibles au Québec ni au Canada",
+        "type": "level2",
+        "id": "113720",
+        "subsections": []
+      },
+      {
+        "name": "Demande d'autorisation pour des services médicaux au Canada, qui ne sont pas disponibles au Québec",
+        "type": "level2",
+        "id": "113721",
+        "subsections": []
+      },
+      {
+        "name": "Services médicaux rendus au Québec demandant une autorisation",
+        "type": "level2",
+        "id": "205936",
+        "subsections": []
+      },
+      {
+        "name": "Services rendus au Québec à des résidents d'autres provinces et des territoires",
+        "type": "level2",
+        "id": "205906",
+        "subsections": []
+      },
+      {
+        "name": "Tableau des dates fixées par la Régie pour la célébration des fêtes légales - article 14.5",
+        "type": "level2",
+        "id": "113724",
+        "subsections": []
+      }
+    ]
+  },
+  {
+    "name": "B - Tarification des visites",
+    "type": "level1",
+    "id": "248225",
+    "subsections": [
+      {
+        "name": "Addendum 1 - Médecine",
+        "type": "level2",
+        "id": "214734",
+        "subsections": []
+      },
+      {
+        "name": "Allergie",
+        "type": "level2",
+        "id": "210737",
+        "subsections": []
+      },
+      {
+        "name": "Anesthésiologie",
+        "type": "level2",
+        "id": "210740",
+        "subsections": []
+      },
+      {
+        "name": "Biochimie",
+        "type": "level2",
+        "id": "211131",
+        "subsections": []
+      },
+      {
+        "name": "Cardiologie",
+        "type": "level2",
+        "id": "210742",
+        "subsections": []
+      },
+      {
+        "name": "Chirurgie cardiovasculaire et thoracique",
+        "type": "level2",
+        "id": "210744",
+        "subsections": []
+      },
+      {
+        "name": "Chirurgie générale",
+        "type": "level2",
+        "id": "210746",
+        "subsections": []
+      },
+      {
+        "name": "Chirurgie orthopédique",
+        "type": "level2",
+        "id": "210749",
+        "subsections": []
+      },
+      {
+        "name": "Chirurgie plastique",
+        "type": "level2",
+        "id": "210752",
+        "subsections": []
+      },
+      {
+        "name": "Chirurgie vasculaire",
+        "type": "level2",
+        "id": "210774",
+        "subsections": []
+      },
+      {
+        "name": "Dermatologie",
+        "type": "level2",
+        "id": "211135",
+        "subsections": []
+      },
+      {
+        "name": "Endocrinologie",
+        "type": "level2",
+        "id": "210779",
+        "subsections": []
+      },
+      {
+        "name": "Gastro-entérologie",
+        "type": "level2",
+        "id": "210781",
+        "subsections": []
+      },
+      {
+        "name": "Addendum 9 - Génétique médicale",
+        "type": "level2",
+        "id": "109240",
+        "subsections": []
+      },
+      {
+        "name": "Génétique médicale",
+        "type": "level2",
+        "id": "210783",
+        "subsections": []
+      },
+      {
+        "name": "Gériatrie",
+        "type": "level2",
+        "id": "210785",
+        "subsections": []
+      },
+      {
+        "name": "Addendum 13 - Hématologie-oncologie médicale",
+        "type": "level2",
+        "id": "232456",
+        "subsections": []
+      },
+      {
+        "name": "Hématologie - oncologie médicale",
+        "type": "level2",
+        "id": "210724",
+        "subsections": []
+      },
+      {
+        "name": "Hygiène publique",
+        "type": "level2",
+        "id": "210973",
+        "subsections": []
+      },
+      {
+        "name": "Addendum 11 - Médecine d'urgence",
+        "type": "level2",
+        "id": "109247",
+        "subsections": []
+      },
+      {
+        "name": "Médecine d'urgence",
+        "type": "level2",
+        "id": "210986",
+        "subsections": []
+      },
+      {
+        "name": "Médecine interne",
+        "type": "level2",
+        "id": "211177",
+        "subsections": []
+      },
+      {
+        "name": "Médecine nucléaire",
+        "type": "level2",
+        "id": "210996",
+        "subsections": []
+      },
+      {
+        "name": "Addendum 10 - Microbiologie-infectiologie",
+        "type": "level2",
+        "id": "109252",
+        "subsections": []
+      },
+      {
+        "name": "Annexe 1 de l'addendum 10 - Microbiologie-infectiologie",
+        "type": "level2",
+        "id": "231088",
+        "subsections": []
+      },
+      {
+        "name": "Microbiologie-infectiologie",
+        "type": "level2",
+        "id": "211055",
+        "subsections": []
+      },
+      {
+        "name": "Néphrologie",
+        "type": "level2",
+        "id": "211122",
+        "subsections": []
+      },
+      {
+        "name": "Neurochirurgie",
+        "type": "level2",
+        "id": "211142",
+        "subsections": []
+      },
+      {
+        "name": "Neurologie-Neuropsychiatrie et électroencéphalographie",
+        "type": "level2",
+        "id": "109125",
+        "subsections": []
+      },
+      {
+        "name": "Obstétrique - Gynécologie",
+        "type": "level2",
+        "id": "211186",
+        "subsections": []
+      },
+      {
+        "name": "Ophtalmologie",
+        "type": "level2",
+        "id": "211423",
+        "subsections": []
+      },
+      {
+        "name": "Oto-rhino-laryngologie",
+        "type": "level2",
+        "id": "224504",
+        "subsections": []
+      },
+      {
+        "name": "Addendum 2 - Pédiatrie",
+        "type": "level2",
+        "id": "109277",
+        "subsections": []
+      },
+      {
+        "name": "Pédiatrie",
+        "type": "level2",
+        "id": "211390",
+        "subsections": []
+      },
+      {
+        "name": "Physiatrie",
+        "type": "level2",
+        "id": "244411",
+        "subsections": []
+      },
+      {
+        "name": "Pneumologie",
+        "type": "level2",
+        "id": "211318",
+        "subsections": []
+      },
+      {
+        "name": "Addendum 3 - Phychiatrie",
+        "type": "level2",
+        "id": "109278",
+        "subsections": []
+      },
+      {
+        "name": "Psychiatrie",
+        "type": "level2",
+        "id": "211320",
+        "subsections": []
+      },
+      {
+        "name": "Radio-oncologie",
+        "type": "level2",
+        "id": "211345",
+        "subsections": []
+      },
+      {
+        "name": "Rhumatologie",
+        "type": "level2",
+        "id": "211347",
+        "subsections": []
+      },
+      {
+        "name": "Addendum 12 - Santé publique et médecine préventive ou médecine de travail",
+        "type": "level2",
+        "id": "109284",
+        "subsections": []
+      },
+      {
+        "name": "Santé publique et médecine préventive ou médecine du travail",
+        "type": "level2",
+        "id": "211349",
+        "subsections": []
+      },
+      {
+        "name": "Urologie",
+        "type": "level2",
+        "id": "211325",
+        "subsections": []
+      },
+      {
+        "name": "Hors discipline",
+        "type": "level2",
+        "id": "211438",
+        "subsections": []
+      },
+      {
+        "name": "Divers",
+        "type": "level2",
+        "id": "211439",
+        "subsections": []
+      },
+      {
+        "name": "Examen médical et constat médico-légal ... victime d'assaut sexuel (Lettre entente n° 5)",
+        "type": "level2",
+        "id": "211440",
+        "subsections": []
+      },
+      {
+        "name": "Évaluation médico-psycho-sociale (Lettre d'entente n° 6)",
+        "type": "level2",
+        "id": "211455",
+        "subsections": []
+      },
+      {
+        "name": "Examen d'un enfant suivant la Loi sur la protection de la jeunesse (Lettre entente n° 64)",
+        "type": "level2",
+        "id": "211454",
+        "subsections": []
+      },
+      {
+        "name": "Rémunération de certaines évaluations médicales (Lettre entente n° 172)",
+        "type": "level2",
+        "id": "211442",
+        "subsections": []
+      },
+      {
+        "name": "Services professionnels couverts par la Loi sur la sécurité du revenu",
+        "type": "level2",
+        "id": "211456",
+        "subsections": []
+      },
+      {
+        "name": "Services professionnels couverts par la Loi sur le curateur public",
+        "type": "level2",
+        "id": "211446",
+        "subsections": []
+      },
+      {
+        "name": "Services professionnels à la demande du coroner",
+        "type": "level2",
+        "id": "211447",
+        "subsections": []
+      },
+      {
+        "name": "Annexe 24 : Rémunération des services médico-administratifs visés par la Loi sur les accidents du travail et les maladies ...",
+        "type": "level2",
+        "id": "211471",
+        "subsections": []
+      }
+    ]
+  },
+  {
+    "name": "C - Procédés diagnostiques et thérapeutiques",
+    "type": "level1",
+    "id": "248226",
+    "subsections": [
+      {
+        "name": "Allergie",
+        "type": "level2",
+        "id": "205975",
+        "subsections": []
+      },
+      {
+        "name": "Analyse de laboratoire",
+        "type": "level2",
+        "id": "205974",
+        "subsections": []
+      },
+      {
+        "name": "Angiologie",
+        "type": "level2",
+        "id": "109129",
+        "subsections": []
+      },
+      {
+        "name": "Aphérèse",
+        "type": "level2",
+        "id": "109130",
+        "subsections": []
+      },
+      {
+        "name": "Aspiration",
+        "type": "level2",
+        "id": "109131",
+        "subsections": []
+      },
+      {
+        "name": "Audiométrie",
+        "type": "level2",
+        "id": "109132",
+        "subsections": []
+      },
+      {
+        "name": "Biopsie (unique ou multiple)",
+        "type": "level2",
+        "id": "205960",
+        "subsections": []
+      },
+      {
+        "name": "Blocages nerveux diagnostiques et thérapeutiques",
+        "type": "level2",
+        "id": "205962",
+        "subsections": []
+      },
+      {
+        "name": "Bronchoscopie flexible incluant la laryngoscopie, la trachéoscopie, la biopsie et l'exérèse de tumeur, le cas échant",
+        "type": "level2",
+        "id": "211299",
+        "subsections": []
+      },
+      {
+        "name": "Cardiologie",
+        "type": "level2",
+        "id": "205968",
+        "subsections": []
+      },
+      {
+        "name": "Cathétérisme cardiaque et études hémodynamiques",
+        "type": "level2",
+        "id": "205969",
+        "subsections": []
+      },
+      {
+        "name": "Interventions cardiologiques",
+        "type": "level2",
+        "id": "205982",
+        "subsections": []
+      },
+      {
+        "name": "Stimulateur cardiaque",
+        "type": "level2",
+        "id": "205983",
+        "subsections": [
+          {
+            "name": "Réanimation",
+            "type": "level3",
+            "id": "71416",
+            "subsections": []
+          }
+        ]
+      },
+      {
+        "name": "Électrophysiologie",
+        "type": "level2",
+        "id": "205985",
+        "subsections": []
+      },
+      {
+        "name": "Cathétérisme veineux",
+        "type": "level2",
+        "id": "205970",
+        "subsections": []
+      },
+      {
+        "name": "Diabétothérapie",
+        "type": "level2",
+        "id": "205991",
+        "subsections": []
+      },
+      {
+        "name": "Dialyse (techniques chirurgicales pour accès)",
+        "type": "level2",
+        "id": "205998",
+        "subsections": []
+      },
+      {
+        "name": "Hémodialyse",
+        "type": "level2",
+        "id": "205999",
+        "subsections": []
+      },
+      {
+        "name": "Électroencéphalographie",
+        "type": "level2",
+        "id": "206000",
+        "subsections": []
+      },
+      {
+        "name": "Électromyographie",
+        "type": "level2",
+        "id": "206013",
+        "subsections": []
+      },
+      {
+        "name": "Électrolyse",
+        "type": "level2",
+        "id": "206014",
+        "subsections": []
+      },
+      {
+        "name": "Épilation au laser",
+        "type": "level2",
+        "id": "206016",
+        "subsections": []
+      },
+      {
+        "name": "Épistaxis",
+        "type": "level2",
+        "id": "113711",
+        "subsections": []
+      },
+      {
+        "name": "Épreuves de fonction respiratoire",
+        "type": "level2",
+        "id": "206017",
+        "subsections": []
+      },
+      {
+        "name": "Épreuves et études : (prélèvement, surveillance et interprétation",
+        "type": "level2",
+        "id": "206003",
+        "subsections": []
+      },
+      {
+        "name": "Épreuves effectuées par un médecin endocrinologue, autres que celles déjà énumérées",
+        "type": "level2",
+        "id": "113714",
+        "subsections": []
+      },
+      {
+        "name": "Examens vestibulaires",
+        "type": "level2",
+        "id": "206004",
+        "subsections": []
+      },
+      {
+        "name": "Vestibulométrie (bilatérale avec enregistrement et rapport",
+        "type": "level2",
+        "id": "206005",
+        "subsections": []
+      },
+      {
+        "name": "Extraction",
+        "type": "level2",
+        "id": "206006",
+        "subsections": []
+      },
+      {
+        "name": "Gastro-entérologie",
+        "type": "level2",
+        "id": "206020",
+        "subsections": []
+      },
+      {
+        "name": "Hémofiltration",
+        "type": "level2",
+        "id": "206027",
+        "subsections": []
+      },
+      {
+        "name": "Injections",
+        "type": "level2",
+        "id": "109301",
+        "subsections": []
+      },
+      {
+        "name": "Insufflation gazeuse",
+        "type": "level2",
+        "id": "109302",
+        "subsections": []
+      },
+      {
+        "name": "Intubation endotrachéale",
+        "type": "level2",
+        "id": "240158",
+        "subsections": []
+      },
+      {
+        "name": "Laryngoscopie rigide avec ou sans biopsie du larynx",
+        "type": "level2",
+        "id": "206034",
+        "subsections": []
+      },
+      {
+        "name": "Bronchoscopie rigide incluant la laryngoscopie, la trachéoscopie, la biopsie et l'exérèse de tumeur, le cas échéant",
+        "type": "level2",
+        "id": "206035",
+        "subsections": []
+      },
+      {
+        "name": "Neurochirurgie",
+        "type": "level2",
+        "id": "206037",
+        "subsections": []
+      },
+      {
+        "name": "Neurologie",
+        "type": "level2",
+        "id": "206038",
+        "subsections": []
+      },
+      {
+        "name": "Obstétrique-gynécologie",
+        "type": "level2",
+        "id": "206030",
+        "subsections": []
+      },
+      {
+        "name": "Ophtalmologie",
+        "type": "level2",
+        "id": "206041",
+        "subsections": []
+      },
+      {
+        "name": "Oxygénation extracorporelle",
+        "type": "level2",
+        "id": "244451",
+        "subsections": []
+      },
+      {
+        "name": "Hypothermie",
+        "type": "level2",
+        "id": "244007",
+        "subsections": []
+      },
+      {
+        "name": "Pléthysmographie",
+        "type": "level2",
+        "id": "109101",
+        "subsections": []
+      },
+      {
+        "name": "Phoniatrie",
+        "type": "level2",
+        "id": "206046",
+        "subsections": []
+      },
+      {
+        "name": "Photodynamie",
+        "type": "level2",
+        "id": "206049",
+        "subsections": []
+      },
+      {
+        "name": "Photothérapie",
+        "type": "level2",
+        "id": "206050",
+        "subsections": []
+      },
+      {
+        "name": "Ponctions (incluant injections s'il y a lieu)",
+        "type": "level2",
+        "id": "206071",
+        "subsections": []
+      },
+      {
+        "name": "Potentiels évoqués",
+        "type": "level2",
+        "id": "206075",
+        "subsections": []
+      },
+      {
+        "name": "Psychiatrie",
+        "type": "level2",
+        "id": "206078",
+        "subsections": []
+      },
+      {
+        "name": "Radiologie",
+        "type": "level2",
+        "id": "206080",
+        "subsections": [
+          {
+            "name": "Procédés diagnostiques et thérapeutiques faits sous contrôle fluoroscopique, échographique, tomodensitométrique ou par IRM",
+            "type": "level3",
+            "id": "113670",
+            "subsections": [
+              {
+                "name": "Angioplastie transluminale per-cutanée non coronarienne",
+                "type": "level4",
+                "id": "11513",
+                "subsections": []
+              },
+              {
+                "name": "Techniques d'embolisation artérielle ou veineuse",
+                "type": "level4",
+                "id": "246000",
+                "subsections": []
+              },
+              {
+                "name": "Crânienne et spinale",
+                "type": "level4",
+                "id": "245986",
+                "subsections": []
+              },
+              {
+                "name": "Cathétérismes non sélectifs, sélectifs ou supersélectifs",
+                "type": "level4",
+                "id": "206081",
+                "subsections": []
+              },
+              {
+                "name": "Cathétérismes veineux",
+                "type": "level4",
+                "id": "11539",
+                "subsections": []
+              },
+              {
+                "name": "Embolectomie",
+                "type": "level4",
+                "id": "11553",
+                "subsections": []
+              },
+              {
+                "name": "Extraction de corps étrangers",
+                "type": "level4",
+                "id": "11555",
+                "subsections": []
+              },
+              {
+                "name": "Installation d'une prothèse vasculaire ou filtre endoveineux",
+                "type": "level4",
+                "id": "113673",
+                "subsections": []
+              },
+              {
+                "name": "Perfusion artérielle médicamenteuse",
+                "type": "level4",
+                "id": "11560",
+                "subsections": []
+              },
+              {
+                "name": "Dénervation rénale",
+                "type": "level4",
+                "id": "71518",
+                "subsections": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Interventions per-cutanées non vasculaires",
+        "type": "level2",
+        "id": "206084",
+        "subsections": [
+          {
+            "name": "Cryochirurgie pour lésions intracrâniennes, intrathoraciques, intraabdominales ou rétropéritonéales",
+            "type": "level3",
+            "id": "11566",
+            "subsections": []
+          },
+          {
+            "name": "Thermoablation tumorale (excluant la peau avec appareil dédié, toute voie d'approche",
+            "type": "level3",
+            "id": "11570",
+            "subsections": []
+          },
+          {
+            "name": "Interventions hépato-biliaires",
+            "type": "level3",
+            "id": "11576",
+            "subsections": []
+          },
+          {
+            "name": "Drainage percutané de voies biliaires",
+            "type": "level3",
+            "id": "11579",
+            "subsections": []
+          },
+          {
+            "name": "Interventions digestives",
+            "type": "level3",
+            "id": "11588",
+            "subsections": []
+          },
+          {
+            "name": "Interventions mammaires",
+            "type": "level3",
+            "id": "11593",
+            "subsections": []
+          },
+          {
+            "name": "Interventions urologiques ou endo-urologiques",
+            "type": "level3",
+            "id": "113675",
+            "subsections": []
+          },
+          {
+            "name": "Interventions neuro-squelettiques",
+            "type": "level3",
+            "id": "11638",
+            "subsections": []
+          }
+        ]
+      },
+      {
+        "name": "Biopsie/cytologie à l'aiguile, par voie transcutanée, sous guidage échoscopique, fluoroscopique ou scanographique",
+        "type": "level2",
+        "id": "206085",
+        "subsections": []
+      },
+      {
+        "name": "Infiltration ou ponction ou drainage par voie transcutanée, sous guidage échoscopique, fluoroscopique ou scanographique",
+        "type": "level2",
+        "id": "206086",
+        "subsections": [
+          {
+            "name": "Mise en place d'un cathéter percutané",
+            "type": "level3",
+            "id": "11684",
+            "subsections": []
+          },
+          {
+            "name": "Implantation de marqueur(s)",
+            "type": "level3",
+            "id": "11689",
+            "subsections": []
+          }
+        ]
+      },
+      {
+        "name": "Injection de substance de contraste",
+        "type": "level2",
+        "id": "206087",
+        "subsections": []
+      },
+      {
+        "name": "Radio-oncologie",
+        "type": "level2",
+        "id": "206088",
+        "subsections": []
+      },
+      {
+        "name": "Radiothérapie palliative",
+        "type": "level2",
+        "id": "206091",
+        "subsections": []
+      },
+      {
+        "name": "Curiethérapie",
+        "type": "level2",
+        "id": "206092",
+        "subsections": []
+      },
+      {
+        "name": "Rhinosinusologie",
+        "type": "level2",
+        "id": "206093",
+        "subsections": []
+      },
+      {
+        "name": "Médecine hyperbare",
+        "type": "level2",
+        "id": "206094",
+        "subsections": []
+      },
+      {
+        "name": "Traitements de physiothérapie",
+        "type": "level2",
+        "id": "206095",
+        "subsections": []
+      },
+      {
+        "name": "Transfusion",
+        "type": "level2",
+        "id": "206096",
+        "subsections": []
+      },
+      {
+        "name": "Transplantation d'organes",
+        "type": "level2",
+        "id": "206097",
+        "subsections": []
+      },
+      {
+        "name": "Urologie",
+        "type": "level2",
+        "id": "212716",
+        "subsections": [
+          {
+            "name": "Endoscopies et manipulations urétro-vésicales",
+            "type": "level3",
+            "id": "206101",
+            "subsections": []
+          },
+          {
+            "name": "Endoscopies et manipulations urétéro-rénales",
+            "type": "level3",
+            "id": "113679",
+            "subsections": []
+          },
+          {
+            "name": "Urodynamie",
+            "type": "level3",
+            "id": "11913",
+            "subsections": []
+          },
+          {
+            "name": "Procréation assistée",
+            "type": "level3",
+            "id": "215890",
+            "subsections": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "D - Anesthésiologie",
+    "type": "level1",
+    "id": "248169",
+    "subsections": [
+      {
+        "name": "Addendum 8 - Anesthésiologie",
+        "type": "level2",
+        "id": "214735",
+        "subsections": [
+          {
+            "name": "Anesthésie pour chirurgie dentaire et buccale",
+            "type": "level3",
+            "id": "211466",
+            "subsections": []
+          },
+          {
+            "name": "Anesthésie régionale pour chirurgie de l'oeil",
+            "type": "level3",
+            "id": "211462",
+            "subsections": []
+          },
+          {
+            "name": "Anesthésie générale pour chirurgie de l'oeil",
+            "type": "level3",
+            "id": "211478",
+            "subsections": []
+          },
+          {
+            "name": "Anesthésie obstétricale",
+            "type": "level3",
+            "id": "211463",
+            "subsections": []
+          },
+          {
+            "name": "Anesthésie et traitement de la douleur",
+            "type": "level3",
+            "id": "211464",
+            "subsections": []
+          },
+          {
+            "name": "Anesthésie en soins palliatifs",
+            "type": "level3",
+            "id": "211479",
+            "subsections": []
+          },
+          {
+            "name": "Inhalothérapie",
+            "type": "level3",
+            "id": "211467",
+            "subsections": []
+          },
+          {
+            "name": "Soins spéciaux",
+            "type": "level3",
+            "id": "211488",
+            "subsections": []
+          },
+          {
+            "name": "Soins de ventilation",
+            "type": "level3",
+            "id": "211489",
+            "subsections": []
+          },
+          {
+            "name": "Coeur-poumon artificiel",
+            "type": "level3",
+            "id": "211490",
+            "subsections": []
+          },
+          {
+            "name": "Transplantations",
+            "type": "level3",
+            "id": "211491",
+            "subsections": []
+          },
+          {
+            "name": "Divers",
+            "type": "level3",
+            "id": "211492",
+            "subsections": []
+          },
+          {
+            "name": "Tableau de correspondance des unités de durée",
+            "type": "level3",
+            "id": "12243",
+            "subsections": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "E - Chirurgie",
+    "type": "level1",
+    "id": "248227",
+    "subsections": [
+      {
+        "name": "Addendum 4 - Chirurgie",
+        "type": "level2",
+        "id": "214736",
+        "subsections": [
+          {
+            "name": "Oto-rhino-laryngologie",
+            "type": "level3",
+            "id": "206060",
+            "subsections": []
+          },
+          {
+            "name": "Chirurgie plastique",
+            "type": "level3",
+            "id": "206061",
+            "subsections": []
+          },
+          {
+            "name": "Neurochirurgie",
+            "type": "level3",
+            "id": "206062",
+            "subsections": []
+          },
+          {
+            "name": "Ophtalmologie",
+            "type": "level3",
+            "id": "206065",
+            "subsections": []
+          },
+          {
+            "name": "Chirurgie générale",
+            "type": "level3",
+            "id": "206108",
+            "subsections": []
+          },
+          {
+            "name": "Urologie",
+            "type": "level3",
+            "id": "206067",
+            "subsections": []
+          }
+        ]
+      },
+      {
+        "name": "Addendum 7 - Microchirurgie",
+        "type": "level2",
+        "id": "214737",
+        "subsections": []
+      }
+    ]
+  },
+  {
+    "name": "F - Peau phanères tissu cellulaire sous cutané et muqueuses",
+    "type": "level1",
+    "id": "248228",
+    "subsections": [
+      {
+        "name": "Abcès, hématome ou sérome, unique ou multiple, incluant le drainage, le cas échéant",
+        "type": "level2",
+        "id": "12683",
+        "subsections": []
+      },
+      {
+        "name": "Tumeur bénigne ou prémaligne",
+        "type": "level2",
+        "id": "206070",
+        "subsections": []
+      },
+      {
+        "name": "Tumeurs cancéreuses",
+        "type": "level2",
+        "id": "223291",
+        "subsections": []
+      },
+      {
+        "name": "Lipectomie fonctionnelle",
+        "type": "level2",
+        "id": "206113",
+        "subsections": []
+      },
+      {
+        "name": "Onycectomie",
+        "type": "level2",
+        "id": "206114",
+        "subsections": []
+      },
+      {
+        "name": "Sinus pilonidal",
+        "type": "level2",
+        "id": "206115",
+        "subsections": []
+      },
+      {
+        "name": "Exérèse de corps étranger",
+        "type": "level2",
+        "id": "206116",
+        "subsections": []
+      },
+      {
+        "name": "Verrue et molluscum contagiosum",
+        "type": "level2",
+        "id": "206117",
+        "subsections": []
+      },
+      {
+        "name": "Cautérisation",
+        "type": "level2",
+        "id": "206118",
+        "subsections": []
+      },
+      {
+        "name": "Réparation de plaies (débridement compris)",
+        "type": "level2",
+        "id": "12834",
+        "subsections": []
+      },
+      {
+        "name": "Brûlures",
+        "type": "level2",
+        "id": "206121",
+        "subsections": []
+      },
+      {
+        "name": "Résection d'un moniteur de lambeau",
+        "type": "level2",
+        "id": "206122",
+        "subsections": []
+      },
+      {
+        "name": "Greffe capillaire",
+        "type": "level2",
+        "id": "206123",
+        "subsections": []
+      },
+      {
+        "name": "Micro-greffe capillaire",
+        "type": "level2",
+        "id": "206125",
+        "subsections": []
+      },
+      {
+        "name": "Greffes cutanées ou greffes cultivées",
+        "type": "level2",
+        "id": "206133",
+        "subsections": []
+      },
+      {
+        "name": "Greffes par glissement, rotation ou transposition",
+        "type": "level2",
+        "id": "206135",
+        "subsections": []
+      },
+      {
+        "name": "Greffe pédiculée (à distance)",
+        "type": "level2",
+        "id": "206136",
+        "subsections": []
+      },
+      {
+        "name": "Greffe libre",
+        "type": "level2",
+        "id": "206137",
+        "subsections": []
+      },
+      {
+        "name": "Dermabrasion : Sablage",
+        "type": "level2",
+        "id": "206140",
+        "subsections": []
+      },
+      {
+        "name": "Correction chirurgicale ou au laser de cicatrices post-traumatiques ou chirurgicales",
+        "type": "level2",
+        "id": "109074",
+        "subsections": []
+      },
+      {
+        "name": "Seins",
+        "type": "level2",
+        "id": "206141",
+        "subsections": []
+      },
+      {
+        "name": "Glandes sudoripares avec ou sans greffe par glissement",
+        "type": "level2",
+        "id": "206144",
+        "subsections": []
+      },
+      {
+        "name": "Fistule cutanée",
+        "type": "level2",
+        "id": "206145",
+        "subsections": []
+      },
+      {
+        "name": "Chirurgie plastique",
+        "type": "level2",
+        "id": "206126",
+        "subsections": []
+      }
+    ]
+  },
+  {
+    "name": "G - Musculo-squelettique",
+    "type": "level1",
+    "id": "248170",
+    "subsections": [
+      {
+        "name": "Addendum 5. - Appareil musculo-squelettique",
+        "type": "level2",
+        "id": "214711",
+        "subsections": [
+          {
+            "name": "Crâne et face",
+            "type": "level3",
+            "id": "113691",
+            "subsections": []
+          },
+          {
+            "name": "Squelette axial",
+            "type": "level3",
+            "id": "113692",
+            "subsections": [
+              {
+                "name": "Colonne vertébrale",
+                "type": "level4",
+                "id": "13265",
+                "subsections": []
+              },
+              {
+                "name": "Thorax",
+                "type": "level4",
+                "id": "13444",
+                "subsections": []
+              },
+              {
+                "name": "Bassin",
+                "type": "level4",
+                "id": "13464",
+                "subsections": []
+              }
+            ]
+          },
+          {
+            "name": "Extrémités - membres supérieurs",
+            "type": "level3",
+            "id": "113693",
+            "subsections": [
+              {
+                "name": "Épaule",
+                "type": "level4",
+                "id": "13511",
+                "subsections": []
+              },
+              {
+                "name": "Bras (Humérus)",
+                "type": "level4",
+                "id": "13611",
+                "subsections": []
+              },
+              {
+                "name": "Coude",
+                "type": "level4",
+                "id": "13677",
+                "subsections": []
+              },
+              {
+                "name": "Avant-bras",
+                "type": "level4",
+                "id": "13733",
+                "subsections": []
+              },
+              {
+                "name": "Main et poignet",
+                "type": "level4",
+                "id": "13788",
+                "subsections": []
+              }
+            ]
+          },
+          {
+            "name": "Extrémités - membres inférieurs",
+            "type": "level3",
+            "id": "113697",
+            "subsections": [
+              {
+                "name": "Hanche",
+                "type": "level4",
+                "id": "13926",
+                "subsections": []
+              },
+              {
+                "name": "Cuisse",
+                "type": "level4",
+                "id": "13988",
+                "subsections": []
+              },
+              {
+                "name": "Fémur",
+                "type": "level4",
+                "id": "13993",
+                "subsections": []
+              },
+              {
+                "name": "Genou",
+                "type": "level4",
+                "id": "14069",
+                "subsections": []
+              },
+              {
+                "name": "Tibia et péroné",
+                "type": "level4",
+                "id": "14159",
+                "subsections": []
+              },
+              {
+                "name": "Cheville",
+                "type": "level4",
+                "id": "14222",
+                "subsections": []
+              },
+              {
+                "name": "Pied",
+                "type": "level4",
+                "id": "244163",
+                "subsections": []
+              }
+            ]
+          },
+          {
+            "name": "Bourse séreuse",
+            "type": "level3",
+            "id": "113698",
+            "subsections": []
+          },
+          {
+            "name": "Muscles",
+            "type": "level3",
+            "id": "213015",
+            "subsections": []
+          },
+          {
+            "name": "Tendons, gaines tendineuses, aponévroses et ligaments",
+            "type": "level3",
+            "id": "148882",
+            "subsections": []
+          },
+          {
+            "name": "Divers",
+            "type": "level3",
+            "id": "148883",
+            "subsections": []
+          },
+          {
+            "name": "Prélèvements chez un cadavre",
+            "type": "level3",
+            "id": "14511",
+            "subsections": []
+          },
+          {
+            "name": "Réimplantation",
+            "type": "level3",
+            "id": "14524",
+            "subsections": []
+          },
+          {
+            "name": "Programme national pour les victimes de traumatismes par amputation ou nécessitant une revascularisation microchirurgicale d'urgence",
+            "type": "level3",
+            "id": "14532",
+            "subsections": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "H - Système respiratoire",
+    "type": "level1",
+    "id": "248229",
+    "subsections": [
+      {
+        "name": "Nez et nasopharynx",
+        "type": "level2",
+        "id": "108976",
+        "subsections": []
+      },
+      {
+        "name": "Sinus",
+        "type": "level2",
+        "id": "108977",
+        "subsections": []
+      },
+      {
+        "name": "Larynx",
+        "type": "level2",
+        "id": "108979",
+        "subsections": []
+      },
+      {
+        "name": "Trachée",
+        "type": "level2",
+        "id": "109051",
+        "subsections": []
+      },
+      {
+        "name": "Bronches",
+        "type": "level2",
+        "id": "109052",
+        "subsections": []
+      },
+      {
+        "name": "Médiastin",
+        "type": "level2",
+        "id": "109053",
+        "subsections": []
+      },
+      {
+        "name": "Poumons et plèvre",
+        "type": "level2",
+        "id": "109054",
+        "subsections": []
+      }
+    ]
+  },
+  {
+    "name": "J - Système cardiaque",
+    "type": "level1",
+    "id": "248230",
+    "subsections": [
+      {
+        "name": "Actes généraux",
+        "type": "level2",
+        "id": "113725",
+        "subsections": []
+      },
+      {
+        "name": "Transplantation",
+        "type": "level2",
+        "id": "108970",
+        "subsections": []
+      },
+      {
+        "name": "Coeur et péricarde",
+        "type": "level2",
+        "id": "108971",
+        "subsections": []
+      },
+      {
+        "name": "Chirurgie coronarienne",
+        "type": "level2",
+        "id": "223635",
+        "subsections": []
+      },
+      {
+        "name": "Chirurgie de l'arythmie",
+        "type": "level2",
+        "id": "108973",
+        "subsections": []
+      },
+      {
+        "name": "Appareil vasculaire",
+        "type": "level2",
+        "id": "223628",
+        "subsections": [
+          {
+            "name": "Thoracique",
+            "type": "level3",
+            "id": "223669",
+            "subsections": []
+          },
+          {
+            "name": "Non thoracique",
+            "type": "level3",
+            "id": "223664",
+            "subsections": []
+          },
+          {
+            "name": "Chirurgie endovasculaire",
+            "type": "level3",
+            "id": "122766",
+            "subsections": []
+          }
+        ]
+      },
+      {
+        "name": "Veines, varices et ulcères variqueux",
+        "type": "level2",
+        "id": "213135",
+        "subsections": []
+      }
+    ]
+  },
+  {
+    "name": "K - Système lymphatique et hématopoïétique",
+    "type": "level1",
+    "id": "248231",
+    "subsections": []
+  },
+  {
+    "name": "L - Système digestif",
+    "type": "level1",
+    "id": "248232",
+    "subsections": [
+      {
+        "name": "Lèvres",
+        "type": "level2",
+        "id": "108952",
+        "subsections": []
+      },
+      {
+        "name": "Bouche",
+        "type": "level2",
+        "id": "108953",
+        "subsections": []
+      },
+      {
+        "name": "Dents et gencives",
+        "type": "level2",
+        "id": "108954",
+        "subsections": []
+      },
+      {
+        "name": "Langue",
+        "type": "level2",
+        "id": "108955",
+        "subsections": []
+      },
+      {
+        "name": "Palais et luette",
+        "type": "level2",
+        "id": "108956",
+        "subsections": []
+      },
+      {
+        "name": "Amygdales et adénoïdes",
+        "type": "level2",
+        "id": "108957",
+        "subsections": []
+      },
+      {
+        "name": "Pharynx",
+        "type": "level2",
+        "id": "108958",
+        "subsections": []
+      },
+      {
+        "name": "Glandes salivaires",
+        "type": "level2",
+        "id": "108959",
+        "subsections": []
+      },
+      {
+        "name": "Oesophage",
+        "type": "level2",
+        "id": "108960",
+        "subsections": []
+      },
+      {
+        "name": "Estomac",
+        "type": "level2",
+        "id": "108961",
+        "subsections": []
+      },
+      {
+        "name": "Intestin (à l'exception du rectum)",
+        "type": "level2",
+        "id": "108962",
+        "subsections": []
+      },
+      {
+        "name": "Appendice",
+        "type": "level2",
+        "id": "108963",
+        "subsections": []
+      },
+      {
+        "name": "Rectum",
+        "type": "level2",
+        "id": "108964",
+        "subsections": []
+      },
+      {
+        "name": "Anus",
+        "type": "level2",
+        "id": "108965",
+        "subsections": []
+      },
+      {
+        "name": "Foie",
+        "type": "level2",
+        "id": "108966",
+        "subsections": []
+      },
+      {
+        "name": "Voies biliaires",
+        "type": "level2",
+        "id": "223849",
+        "subsections": []
+      },
+      {
+        "name": "Pancréas",
+        "type": "level2",
+        "id": "108968",
+        "subsections": []
+      },
+      {
+        "name": "Abdomen, péritoine et épiploon",
+        "type": "level2",
+        "id": "108969",
+        "subsections": []
+      }
+    ]
+  },
+  {
+    "name": "M - Appareil urinaire",
+    "type": "level1",
+    "id": "248171",
+    "subsections": [
+      {
+        "name": "Rein",
+        "type": "level2",
+        "id": "213532",
+        "subsections": []
+      },
+      {
+        "name": "Rétropéritoine",
+        "type": "level2",
+        "id": "108948",
+        "subsections": []
+      },
+      {
+        "name": "Uretère",
+        "type": "level2",
+        "id": "108949",
+        "subsections": []
+      },
+      {
+        "name": "Vessie",
+        "type": "level2",
+        "id": "108950",
+        "subsections": []
+      },
+      {
+        "name": "Urètre",
+        "type": "level2",
+        "id": "108951",
+        "subsections": []
+      }
+    ]
+  },
+  {
+    "name": "N - Appareil génital mâle",
+    "type": "level1",
+    "id": "248172",
+    "subsections": [
+      {
+        "name": "Pénis",
+        "type": "level2",
+        "id": "113486",
+        "subsections": []
+      },
+      {
+        "name": "Testicules",
+        "type": "level2",
+        "id": "113487",
+        "subsections": []
+      },
+      {
+        "name": "Scrotum",
+        "type": "level2",
+        "id": "113488",
+        "subsections": []
+      },
+      {
+        "name": "Canal déférent",
+        "type": "level2",
+        "id": "113489",
+        "subsections": []
+      },
+      {
+        "name": "Cordon",
+        "type": "level2",
+        "id": "224336",
+        "subsections": []
+      },
+      {
+        "name": "Vésicule séminale",
+        "type": "level2",
+        "id": "113491",
+        "subsections": []
+      },
+      {
+        "name": "Prostate",
+        "type": "level2",
+        "id": "113492",
+        "subsections": []
+      }
+    ]
+  },
+  {
+    "name": "P - Gynécologie",
+    "type": "level1",
+    "id": "248173",
+    "subsections": [
+      {
+        "name": "Addendum 6 - Obstétrique-gynécologie",
+        "type": "level2",
+        "id": "214713",
+        "subsections": [
+          {
+            "name": "Vulve et orifice inférieur du vagin",
+            "type": "level3",
+            "id": "113493",
+            "subsections": []
+          },
+          {
+            "name": "Vagin",
+            "type": "level3",
+            "id": "113494",
+            "subsections": []
+          },
+          {
+            "name": "Trompes",
+            "type": "level3",
+            "id": "244229",
+            "subsections": []
+          },
+          {
+            "name": "Ovaires",
+            "type": "level3",
+            "id": "244271",
+            "subsections": []
+          },
+          {
+            "name": "Utérus et col utérin",
+            "type": "level3",
+            "id": "244270",
+            "subsections": []
+          },
+          {
+            "name": "Divers",
+            "type": "level3",
+            "id": "113498",
+            "subsections": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Q - Obstétrique",
+    "type": "level1",
+    "id": "248234",
+    "subsections": [
+      {
+        "name": "Addendum 6 - Obstétrique-gynécologie",
+        "type": "level2",
+        "id": "214738",
+        "subsections": [
+          {
+            "name": "Obstétrique",
+            "type": "level3",
+            "id": "16611",
+            "subsections": []
+          },
+          {
+            "name": "Procréation assistée",
+            "type": "level3",
+            "id": "113727",
+            "subsections": []
+          },
+          {
+            "name": "Annexe I : Accouchement dans les cas complexes (acte codé 06945)",
+            "type": "level3",
+            "id": "208828",
+            "subsections": []
+          },
+          {
+            "name": "Annexe II : Honoraire global de manoeuvre obstétricale intra-partum (acte codé 06929)",
+            "type": "level3",
+            "id": "16784",
+            "subsections": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "R - Appareil glandulaire",
+    "type": "level1",
+    "id": "248174",
+    "subsections": [
+      {
+        "name": "Thyroïde",
+        "type": "level2",
+        "id": "206202",
+        "subsections": []
+      },
+      {
+        "name": "Parathyroïde",
+        "type": "level2",
+        "id": "206203",
+        "subsections": []
+      },
+      {
+        "name": "Surrénales",
+        "type": "level2",
+        "id": "206204",
+        "subsections": []
+      }
+    ]
+  },
+  {
+    "name": "S - Système nerveux",
+    "type": "level1",
+    "id": "248175",
+    "subsections": [
+      {
+        "name": "Crâne et encéphale",
+        "type": "level2",
+        "id": "113521",
+        "subsections": [
+          {
+            "name": "Lésions expansives tumorales",
+            "type": "level3",
+            "id": "16868",
+            "subsections": []
+          },
+          {
+            "name": "Lésions infectieuses & parasitaires",
+            "type": "level3",
+            "id": "16918",
+            "subsections": []
+          },
+          {
+            "name": "Lésions vasculaires",
+            "type": "level3",
+            "id": "16935",
+            "subsections": []
+          },
+          {
+            "name": "Lésions vasculaires cervicales",
+            "type": "level3",
+            "id": "16980",
+            "subsections": []
+          },
+          {
+            "name": "Lésions traumatiques",
+            "type": "level3",
+            "id": "16984",
+            "subsections": []
+          },
+          {
+            "name": "Liquide céphalo-rachidien",
+            "type": "level3",
+            "id": "16991",
+            "subsections": []
+          }
+        ]
+      },
+      {
+        "name": "Malformation congénitale crânio-encéphalique",
+        "type": "level2",
+        "id": "17015",
+        "subsections": [
+          {
+            "name": "Crâne",
+            "type": "level3",
+            "id": "206206",
+            "subsections": []
+          },
+          {
+            "name": "Méninges & Encéphale",
+            "type": "level3",
+            "id": "206207",
+            "subsections": []
+          }
+        ]
+      },
+      {
+        "name": "Neurochirurgie fonctionnelle & stéréotaxie",
+        "type": "level2",
+        "id": "17036",
+        "subsections": [
+          {
+            "name": "Installation du cadre",
+            "type": "level3",
+            "id": "17043",
+            "subsections": []
+          },
+          {
+            "name": "Neurochirurgie de l'épilepsie",
+            "type": "level3",
+            "id": "17061",
+            "subsections": []
+          }
+        ]
+      },
+      {
+        "name": "Neurochirurgie des nerfs crâniens",
+        "type": "level2",
+        "id": "113522",
+        "subsections": [
+          {
+            "name": "Chirurgie du nerf facial",
+            "type": "level3",
+            "id": "17093",
+            "subsections": []
+          },
+          {
+            "name": "Divers",
+            "type": "level3",
+            "id": "17105",
+            "subsections": []
+          }
+        ]
+      },
+      {
+        "name": "Rachis, moëlle, queue de cheval",
+        "type": "level2",
+        "id": "113524",
+        "subsections": [
+          {
+            "name": "Tumorale",
+            "type": "level3",
+            "id": "17134",
+            "subsections": []
+          },
+          {
+            "name": "Dégénérative et traumatique",
+            "type": "level3",
+            "id": "17147",
+            "subsections": []
+          },
+          {
+            "name": "Lésions vasculaires",
+            "type": "level3",
+            "id": "17151",
+            "subsections": []
+          },
+          {
+            "name": "Lésions infectieuses",
+            "type": "level3",
+            "id": "17158",
+            "subsections": []
+          },
+          {
+            "name": "Malformations congénitales du rachis et moëlle épinière",
+            "type": "level3",
+            "id": "114026",
+            "subsections": []
+          },
+          {
+            "name": "Neurochirurgie fonctionnelle",
+            "type": "level3",
+            "id": "17202",
+            "subsections": []
+          }
+        ]
+      },
+      {
+        "name": "Nerfs périphériques",
+        "type": "level2",
+        "id": "113540",
+        "subsections": []
+      },
+      {
+        "name": "Divers",
+        "type": "level2",
+        "id": "113548",
+        "subsections": []
+      }
+    ]
+  },
+  {
+    "name": "T - Appareil visuel",
+    "type": "level1",
+    "id": "248235",
+    "subsections": [
+      {
+        "name": "Globe oculaire",
+        "type": "level2",
+        "id": "108906",
+        "subsections": []
+      },
+      {
+        "name": "Cornée",
+        "type": "level2",
+        "id": "108907",
+        "subsections": []
+      },
+      {
+        "name": "Sclérotique",
+        "type": "level2",
+        "id": "108908",
+        "subsections": []
+      },
+      {
+        "name": "Iris et corps ciliaire",
+        "type": "level2",
+        "id": "108931",
+        "subsections": []
+      },
+      {
+        "name": "Cristallin",
+        "type": "level2",
+        "id": "108932",
+        "subsections": []
+      },
+      {
+        "name": "Corps vitré",
+        "type": "level2",
+        "id": "108933",
+        "subsections": []
+      },
+      {
+        "name": "Rétine",
+        "type": "level2",
+        "id": "108934",
+        "subsections": []
+      },
+      {
+        "name": "Muscles oculaires",
+        "type": "level2",
+        "id": "108938",
+        "subsections": []
+      },
+      {
+        "name": "Orbite",
+        "type": "level2",
+        "id": "108940",
+        "subsections": []
+      },
+      {
+        "name": "Paupières et sourcils",
+        "type": "level2",
+        "id": "108941",
+        "subsections": []
+      },
+      {
+        "name": "Cils",
+        "type": "level2",
+        "id": "108942",
+        "subsections": []
+      },
+      {
+        "name": "Conjonctive",
+        "type": "level2",
+        "id": "108943",
+        "subsections": []
+      },
+      {
+        "name": "Appareil lacrymal",
+        "type": "level2",
+        "id": "108944",
+        "subsections": []
+      },
+      {
+        "name": "Corps étranger",
+        "type": "level2",
+        "id": "108945",
+        "subsections": []
+      },
+      {
+        "name": "Traumatisme oculaire",
+        "type": "level2",
+        "id": "108946",
+        "subsections": []
+      }
+    ]
+  },
+  {
+    "name": "U - Appareil auditif",
+    "type": "level1",
+    "id": "248176",
+    "subsections": [
+      {
+        "name": "Oreille externe",
+        "type": "level2",
+        "id": "108903",
+        "subsections": []
+      },
+      {
+        "name": "Oreille moyenne",
+        "type": "level2",
+        "id": "108904",
+        "subsections": []
+      },
+      {
+        "name": "Oreille interne",
+        "type": "level2",
+        "id": "122092",
+        "subsections": []
+      }
+    ]
+  },
+  {
+    "name": "V - Radiologie diagnostique",
+    "type": "level1",
+    "id": "248177",
+    "subsections": []
+  }
+]

@@ -1,32 +1,12 @@
 {
-  "name": "mediledger",
-  "version": "1.0.0",
-  "main": "index.js",
-  "dependencies": {
-    "@langchain/core": "^0.3.72",
-    "cheerio": "^1.1.0",
-    "diff": "^4.0.2",
-    "dotenv": "^16.4.5",
-    "langchain": "^0.3.31",
-    "openai": "^5.15.0"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "start": "ts-node src/scraper.ts",
-    "start:cheerio": "ts-node src/cheerio-scraper.ts",
-    "dev": "ts-node --watch src/scraper.ts"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "@types/cheerio": "^0.22.35",
-    "@types/diff": "^7.0.2",
-    "@types/dotenv": "^6.1.1",
-    "@types/node": "^24.1.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
-  }
+    "name": "mediledger-monorepo",
+    "version": "1.0.0",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "etl": "npm run start:cheerio --workspace=mediledger"
+    }
 }
