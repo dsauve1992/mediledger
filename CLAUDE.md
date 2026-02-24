@@ -46,13 +46,12 @@ The pipeline is sequential — each step's JSON output feeds the next. Steps are
 | 2 | `2-equalize-section-headers/` | — | Normalize heading levels |
 | 3 | `3-group-content-by-section/` | `sectionsWithContent.json` | Group HTML by section |
 | 4 | `4-sanitize-html/` | `modified-content.json` | Strip formatting, normalize whitespace |
-| 5 | `5-group-and-structure-document/` | `structured-content.json` | LLM converts HTML → structured rule objects |
-| 6 | `6-structurize-logic/` | `structured-logic.json` | LLM converts rules → JSON logic trees (AST) |
+| 5 | `5-extract-specs/` | `specs.json` | LLM: section → array of `BillingSpec` per article (with embedded logic AST + source traceability). Post-pass writes `specs-normalized.json` + `variable-registry.json` |
 
 **Entry point:** `cheerio-scraper.ts` orchestrates all steps sequentially.
 
 **Phase 1 (Steps 1–4):** Deterministic, no external APIs, fast (~5s total).
-**Phase 2 (Steps 5–6):** LLM-powered, slow (~20 min for Step 6 alone due to ~3,000 OpenAI API calls).
+**Phase 2 (Step 5):** LLM-powered (~100 API calls, one per section). Each call returns fully-validated `BillingSpec` objects with embedded logic AST. A post-normalization pass canonicalizes CONTEXT variable names.
 
 ### Logic Schema (AST)
 
@@ -84,4 +83,4 @@ Steps 5 and 6 use LangChain + OpenAI with temperature 0 for deterministic extrac
 
 ## Current Status
 
-Phase 1 (Foundation) is complete. Active work is on Step 6 (improving validation rate, targeting 95%+). Future steps (7–10) include deduplication, conflict detection, tariff extraction, and TypeScript code generation.
+Phase 1 (Foundation) is complete. Phase 2 (Step 5) has been redesigned: single-pass LLM extraction with full Zod validation, source traceability, and variable canonicalization. Future steps (6–9) include deduplication, conflict detection, tariff extraction, and TypeScript code generation.
