@@ -1,10 +1,13 @@
 import * as cheerio from 'cheerio';
+import * as dotenv from 'dotenv';
 import { compareString } from "./validation";
 import { extractMenuItems, flattenMenuItems } from "./1-extract-structure-from-menu/menu-items";
 import { loadFromPath } from "./cheerio.utils";
 import { getDocumentWithMainSectionAsDirectChildren } from "./2-equalize-section-headers";
 import { extractSectionsWithContent } from "./3-group-content-by-section";
 import { sanitizeHtmlContent } from "./4-sanitize-html";
+import { extractSpecs } from "./5-extract-specs";
+import { normalizeVariables } from "./5-extract-specs/normalize-variables";
 
 
 interface Document {
@@ -31,6 +34,10 @@ async function main() {
     const $ = loadFromPath(filePath);
 
     parseDocument($);
+
+    dotenv.config();
+    await extractSpecs();
+    await normalizeVariables();
 }
 
 function parseDocument(originalCheerioRoot: cheerio.Root) {
