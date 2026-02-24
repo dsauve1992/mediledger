@@ -27,6 +27,8 @@ interface RawElement {
 }
 
 async function main() {
+    dotenv.config();
+
     const filePath = './src/manuel-specialistes-remuneration-acte.html';
 
     console.log('=== STARTING SCRAPER ===');
@@ -35,7 +37,6 @@ async function main() {
 
     parseDocument($);
 
-    dotenv.config();
     await extractSpecs();
     await normalizeVariables();
 }
