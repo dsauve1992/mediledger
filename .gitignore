@@ -4,3 +4,9 @@ node_modules
 dist
 
 .env*
+# ETL pipeline output files
+apps/etl/structured-content.json
+apps/etl/structured-logic.json
+apps/etl/specs.json
+apps/etl/specs-normalized.json
+apps/etl/variable-registry.json

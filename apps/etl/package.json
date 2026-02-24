@@ -4,12 +4,13 @@
   "main": "index.js",
   "dependencies": {
     "@langchain/core": "^0.3.72",
+    "@mediledger/core": "*",
     "cheerio": "^1.1.0",
     "diff": "^4.0.2",
     "dotenv": "^16.4.5",
     "langchain": "^0.3.31",
     "openai": "^5.15.0",
-    "@mediledger/core": "*"
+    "zod": "^4.1.13"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
