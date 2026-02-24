@@ -4,6 +4,7 @@
   "main": "index.js",
   "dependencies": {
     "@langchain/core": "^0.3.72",
+    "@langchain/openai": "^0.6.9",
     "@mediledger/core": "*",
     "cheerio": "^1.1.0",
     "diff": "^4.0.2",

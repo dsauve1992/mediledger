@@ -7,7 +7,7 @@ import { BillingSpecArraySchema, SpecResult } from './spec-schema';
 import { SYSTEM_PROMPT } from './prompt';
 
 interface Section {
-    id: string;
+    id?: string;
     parentId: string | null;
     name: string;
     content: (string | object)[];
