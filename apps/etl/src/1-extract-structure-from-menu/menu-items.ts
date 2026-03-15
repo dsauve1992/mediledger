@@ -1,4 +1,6 @@
 import fs from "fs";
+import * as path from "path";
+import { loadFromPath } from "../cheerio.utils";
 
 export interface MenuItem {
     name: string;
@@ -14,6 +16,9 @@ export interface FlattenedMenuItem {
     parentId: string | null;
 }
 
+const INPUT_PATH = path.resolve(process.cwd(), 'src/manuel-specialistes-remuneration-acte.html');
+const OUTPUT_PATH = path.resolve(process.cwd(), 'menu.json');
+
 export function extractMenuItems(originalCheerioRoot: cheerio.Root) {
     const menuGauche = originalCheerioRoot('#menuGauche');
     if (!menuGauche.length) {
@@ -28,7 +33,7 @@ export function extractMenuItems(originalCheerioRoot: cheerio.Root) {
 
     const menu = parseMenuList(originalCheerioRoot, navUl, 1);
 
-    fs.writeFileSync('./menu.json', JSON.stringify(menu, null, 2), 'utf-8');
+    fs.writeFileSync(OUTPUT_PATH, JSON.stringify(menu, null, 2), 'utf-8');
 
     return menu;
 }
@@ -91,4 +96,14 @@ export function flattenMenuItems(menuItems: MenuItem[]): FlattenedMenuItem[] {
 
     flattenRecursive(null, menuItems);
     return flattened;
+}
+
+if (require.main === module) {
+    if (!fs.existsSync(INPUT_PATH)) {
+        throw new Error(`Input file not found: ${INPUT_PATH}`);
+    }
+    const $ = loadFromPath(INPUT_PATH);
+    const menuItems = extractMenuItems($);
+    const flat = flattenMenuItems(menuItems);
+    console.log(`✅ Step 1 complete: ${flat.length} menu items → menu.json`);
 }

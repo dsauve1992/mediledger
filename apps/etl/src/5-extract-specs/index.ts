@@ -71,6 +71,14 @@ async function processSection(
     }
 }
 
+if (require.main === module) {
+    require('dotenv').config();
+    if (!fs.existsSync(INPUT_PATH)) {
+        throw new Error(`Input file not found: ${INPUT_PATH} — run step 4 first`);
+    }
+    extractSpecs().catch(console.error);
+}
+
 export async function extractSpecs(): Promise<SpecResult[]> {
     if (!fs.existsSync(INPUT_PATH)) {
         throw new Error(`Input file not found: ${INPUT_PATH}`);

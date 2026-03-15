@@ -1,11 +1,15 @@
-import {SectionWithContent, SectionWithNormalizedContent} from "../3-group-content-by-section";
+import { SectionWithContent, SectionWithNormalizedContent } from "../3-group-content-by-section";
 import fs from "fs";
+import * as path from "path";
 import * as cheerio from "cheerio";
-import {normalizeWhitespace} from "../normalize-whitespace";
+import { normalizeWhitespace } from "../normalize-whitespace";
+
+const INPUT_PATH = path.resolve(process.cwd(), 'sectionsWithContent.json');
+const OUTPUT_PATH = path.resolve(process.cwd(), 'modified-content.json');
 
 export function sanitizeHtmlContent(sectionsWithContent: SectionWithContent[]): SectionWithNormalizedContent[] {
-    if (fs.existsSync('./modified-content.json')) {
-        return JSON.parse(fs.readFileSync('./modified-content.json', 'utf-8'));
+    if (fs.existsSync(OUTPUT_PATH)) {
+        return JSON.parse(fs.readFileSync(OUTPUT_PATH, 'utf-8'));
     }
 
     const modified: SectionWithNormalizedContent[] = sectionsWithContent.map(section => {
@@ -15,7 +19,7 @@ export function sanitizeHtmlContent(sectionsWithContent: SectionWithContent[]): 
         }
     });
 
-    fs.writeFileSync('./modified-content.json', JSON.stringify(modified, null, 2), 'utf-8');
+    fs.writeFileSync(OUTPUT_PATH, JSON.stringify(modified, null, 2), 'utf-8');
 
     return modified
 }
@@ -94,3 +98,12 @@ const toNumber = (raw?: string) =>
     raw === undefined
         ? undefined
         : parseFloat(raw.replace(/[ \u00A0\u202F]/g, "").replace(",", "."));
+
+if (require.main === module) {
+    if (!fs.existsSync(INPUT_PATH)) {
+        throw new Error(`Input file not found: ${INPUT_PATH} — run step 3 first`);
+    }
+    const sections: SectionWithContent[] = JSON.parse(fs.readFileSync(INPUT_PATH, 'utf-8'));
+    const sanitized = sanitizeHtmlContent(sections);
+    console.log(`✅ Step 4 complete: ${sanitized.length} sections → modified-content.json`);
+}
