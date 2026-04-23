@@ -3,6 +3,9 @@
 node_modules
 dist
 
+.DS_Store
+.superpowers/
+
 .env*
 # ETL pipeline output files
 apps/etl/structured-content.json
