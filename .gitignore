@@ -5,6 +5,7 @@ dist
 
 .DS_Store
 .superpowers/
+docs/plans/
 
 .env*
 # ETL pipeline output files
