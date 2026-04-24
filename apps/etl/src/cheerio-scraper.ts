@@ -38,7 +38,11 @@ async function main() {
     parseDocument($);
 
     await extractSpecs();
-    await normalizeVariables();
+    if (process.env.STEP5_LIMIT) {
+        console.log('🧪 Smoke mode: skipping normalizeVariables');
+    } else {
+        await normalizeVariables();
+    }
 }
 
 function parseDocument(originalCheerioRoot: cheerio.Root) {

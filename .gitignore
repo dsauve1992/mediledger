@@ -12,5 +12,8 @@ docs/plans/
 apps/etl/structured-content.json
 apps/etl/structured-logic.json
 apps/etl/specs.json
+apps/etl/specs.progress.json
+apps/etl/specs.smoke-*.json
+apps/etl/specs.smoke-*.progress.json
 apps/etl/specs-normalized.json
 apps/etl/variable-registry.json

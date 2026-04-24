@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
+    "@langchain/anthropic": "^0.3.34",
     "@langchain/core": "^0.3.72",
     "@langchain/openai": "^0.6.9",
     "@mediledger/core": "*",

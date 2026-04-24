@@ -1,9 +1,17 @@
 // apps/etl/src/5-extract-specs/normalize-variables.ts
 import * as fs from 'fs';
 import * as path from 'path';
-import { ChatOpenAI } from '@langchain/openai';
+import { z } from 'zod';
+import { ChatAnthropic } from '@langchain/anthropic';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
 import { SpecResult, LogicNode } from './spec-schema';
+
+const RegistryResponseSchema = z.object({
+    mappings: z.array(z.object({
+        original: z.string(),
+        canonical: z.string(),
+    })),
+});
 
 const SPECS_PATH = path.resolve(process.cwd(), 'specs.json');
 const REGISTRY_PATH = path.resolve(process.cwd(), 'variable-registry.json');
@@ -43,30 +51,33 @@ function applyRegistry(node: any, registry: Record<string, string>): any {
 
 async function buildRegistry(
     variables: string[],
-    model: ChatOpenAI
+    model: ChatAnthropic
 ): Promise<Record<string, string>> {
     const prompt = `You are a medical billing ontology expert.
 Below is a list of variable names extracted from RAMQ billing rules by an LLM.
 They represent the same concepts but may have different names (e.g., "is_hospitalized", "patient_hospitalized", "hospitalized").
 
 Your task: group semantically equivalent variables and assign one canonical snake_case name per group.
-Return ONLY a JSON object mapping each original name to its canonical name. No explanation, no markdown.
+Return a mapping from each original variable name to its canonical name.
 
 Variables:
-${JSON.stringify(variables, null, 2)}
+${JSON.stringify(variables, null, 2)}`;
 
-Output format:
-{ "original_name": "canonical_name", ... }`;
+    const structured = model.withStructuredOutput(RegistryResponseSchema, {
+        name: 'build_variable_registry',
+    });
 
-    const response = await model.invoke([
-        new SystemMessage('You are a medical billing ontology expert. Respond with JSON only.'),
+    const raw = await structured.invoke([
+        new SystemMessage('You are a medical billing ontology expert.'),
         new HumanMessage(prompt),
     ]);
 
-    const raw = response.content as string;
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No JSON object found in normalization response');
-    return JSON.parse(jsonMatch[0]);
+    const { mappings } = RegistryResponseSchema.parse(raw);
+    const registry: Record<string, string> = {};
+    for (const { original, canonical } of mappings) {
+        registry[original] = canonical;
+    }
+    return registry;
 }
 
 export async function normalizeVariables(): Promise<void> {
@@ -98,10 +109,13 @@ export async function normalizeVariables(): Promise<void> {
         return;
     }
 
-    const model = new ChatOpenAI({
-        model: 'gpt-4o',
+    const model = new ChatAnthropic({
+        model: 'claude-sonnet-4-6',
         temperature: 0,
-        apiKey: process.env.OPENAI_API_KEY,
+        maxTokens: 32768,
+        streaming: true,
+        apiKey: process.env.ANTHROPIC_API_KEY,
+        invocationKwargs: { top_p: undefined, top_k: undefined },
     });
 
     const registry = await buildRegistry(variableList, model);

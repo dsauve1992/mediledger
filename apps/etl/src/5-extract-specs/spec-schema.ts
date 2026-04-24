@@ -107,6 +107,10 @@ export const BillingSpecSchema = z.object({
 
 export const BillingSpecArraySchema = z.array(BillingSpecSchema);
 
+export const BillingSpecResponseSchema = z.object({
+    specs: z.array(BillingSpecSchema),
+});
+
 export type BillingSpec = z.infer<typeof BillingSpecSchema>;
 export type LogicNode = z.infer<typeof LogicNodeSchema>;
 export type RuleType = z.infer<typeof RuleTypeSchema>;
@@ -114,5 +118,4 @@ export type RuleType = z.infer<typeof RuleTypeSchema>;
 // --- Output envelope (what goes into specs.json) ---
 export type SpecResult =
     | ({ status: 'success' } & BillingSpec)
-    | { status: 'validation_error'; sectionId: string; sectionName: string; rawLLMResponse: string; zodError: z.ZodError }
     | { status: 'error'; sectionId: string; sectionName: string; errorMessage: string };
