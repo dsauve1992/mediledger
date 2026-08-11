@@ -1,4 +1,4 @@
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
 import { FlattenedMenuItem, MenuItem, flattenMenuItems } from "../1-extract-structure-from-menu/menu-items";
 import fs from "fs";
 import * as path from "path";

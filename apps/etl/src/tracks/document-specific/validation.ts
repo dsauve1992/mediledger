@@ -1,5 +1,5 @@
 import * as diff from "diff";
-import {normalizeWhitespace} from "./normalize-whitespace";
+import {normalizeWhitespace} from "../../shared/normalize-whitespace";
 
 export function isTextEqualIgnoringWhitespace(a: string, b: string): boolean {
     const changes = diff.diffWords(a, b);

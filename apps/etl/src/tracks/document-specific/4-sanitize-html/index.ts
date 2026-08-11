@@ -2,7 +2,7 @@ import { SectionWithContent, SectionWithNormalizedContent } from "../3-group-con
 import fs from "fs";
 import * as path from "path";
 import * as cheerio from "cheerio";
-import { normalizeWhitespace } from "../normalize-whitespace";
+import { normalizeWhitespace } from "../../../shared/normalize-whitespace";
 
 const INPUT_PATH = path.resolve(process.cwd(), 'sectionsWithContent.json');
 const OUTPUT_PATH = path.resolve(process.cwd(), 'modified-content.json');

@@ -4,7 +4,7 @@ import * as path from 'path';
 import { z } from 'zod';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
-import { SpecResult, LogicNode } from './spec-schema';
+import { SpecResult, LogicNode } from '../../../shared/spec-schema';
 
 const RegistryResponseSchema = z.object({
     mappings: z.array(z.object({

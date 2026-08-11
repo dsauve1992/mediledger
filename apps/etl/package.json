@@ -17,15 +17,22 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "ts-node src/scraper.ts",
-    "start:cheerio": "ts-node src/cheerio-scraper.ts",
-    "dev": "ts-node --watch src/scraper.ts",
-    "step1": "ts-node src/1-extract-structure-from-menu/menu-items.ts",
-    "step2": "ts-node src/2-equalize-section-headers/index.ts",
-    "step3": "ts-node src/3-group-content-by-section/index.ts",
-    "step4": "ts-node src/4-sanitize-html/index.ts",
-    "step5": "ts-node src/5-extract-specs/index.ts",
-    "step5:normalize": "ts-node src/5-extract-specs/normalize-variables.ts"
+    "start:cheerio": "ts-node src/tracks/document-specific/cheerio-scraper.ts",
+
+    "//track-a": "── track A: document-specific (cheerio + RAMQ nav) ──",
+    "a:step1": "ts-node src/tracks/document-specific/1-extract-structure-from-menu/menu-items.ts",
+    "a:step2": "ts-node src/tracks/document-specific/2-equalize-section-headers/index.ts",
+    "a:step3": "ts-node src/tracks/document-specific/3-group-content-by-section/index.ts",
+    "a:step4": "ts-node src/tracks/document-specific/4-sanitize-html/index.ts",
+    "a:step5": "ts-node src/tracks/document-specific/5-extract-specs/index.ts",
+    "a:step5:normalize": "ts-node src/tracks/document-specific/5-extract-specs/normalize-variables.ts",
+
+    "//track-b": "── track B: format-agnostic (docling + chunking) ──",
+    "b:setup": "cd src/tracks/format-agnostic/docling && uv venv --python 3.12 .venv && VIRTUAL_ENV=.venv uv pip install docling",
+    "b:md": "cd src/tracks/format-agnostic/docling && .venv/bin/python to_markdown.py ../../../manuel-specialistes-remuneration-acte.html -o docling.md",
+    "b:compare-text": "cd src/tracks/format-agnostic/docling && .venv/bin/python compare_text.py --html ../../../manuel-specialistes-remuneration-acte.html",
+    "b:ingest": "cd src/tracks/format-agnostic/docling && .venv/bin/python ingest.py ../../../manuel-specialistes-remuneration-acte.html -o docling-content.json",
+    "b:compare": "cd src/tracks/format-agnostic/docling && .venv/bin/python compare.py --a ../../../../modified-content.json"
   },
   "keywords": [],
   "author": "",

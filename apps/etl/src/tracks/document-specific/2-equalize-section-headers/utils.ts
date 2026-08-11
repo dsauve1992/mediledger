@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import {normalizeWhitespace} from "../normalize-whitespace";
+import {normalizeWhitespace} from "../../../shared/normalize-whitespace";
 
 /**
  * Promote an element up the DOM until its direct parent is the given ancestor.

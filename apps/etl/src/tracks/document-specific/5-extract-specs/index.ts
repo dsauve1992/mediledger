@@ -4,7 +4,7 @@ import * as path from 'path';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
 import { Runnable } from '@langchain/core/runnables';
-import { BillingSpecResponseSchema, SpecResult } from './spec-schema';
+import { BillingSpecResponseSchema, SpecResult } from '../../../shared/spec-schema';
 import { SYSTEM_PROMPT } from './prompt';
 
 interface Section {
