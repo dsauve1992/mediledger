@@ -29,10 +29,8 @@
 
     "//track-b": "── track B: format-agnostic (docling + chunking) ──",
     "b:setup": "cd src/tracks/format-agnostic/docling && uv venv --python 3.12 .venv && VIRTUAL_ENV=.venv uv pip install docling",
-    "b:md": "cd src/tracks/format-agnostic/docling && .venv/bin/python to_markdown.py ../../../manuel-specialistes-remuneration-acte.html -o docling.md",
-    "b:compare-text": "cd src/tracks/format-agnostic/docling && .venv/bin/python compare_text.py --html ../../../manuel-specialistes-remuneration-acte.html",
-    "b:ingest": "cd src/tracks/format-agnostic/docling && .venv/bin/python ingest.py ../../../manuel-specialistes-remuneration-acte.html -o docling-content.json",
-    "b:compare": "cd src/tracks/format-agnostic/docling && .venv/bin/python compare.py --a ../../../../modified-content.json"
+    "b:md": "cd src/tracks/format-agnostic/docling && .venv/bin/python to_md.py ../../../manuel-specialistes-remuneration-acte.html",
+    "b:compare-text": "cd src/tracks/format-agnostic/docling && .venv/bin/python compare_text.py --html ../../../manuel-specialistes-remuneration-acte.html"
   },
   "keywords": [],
   "author": "",
