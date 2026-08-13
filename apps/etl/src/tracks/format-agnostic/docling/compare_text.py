@@ -29,6 +29,15 @@ parser reading the cell gets two tokens ("89," and "90") instead of one value.
 Whitespace-squashing would silently repair it in the comparison while the real
 artifact stays broken, so the split-amount check runs on RAW text and fails.
 
+WHERE THAT DEFECT COMES FROM, measured after this script was written. It is
+introduced by `export_to_markdown()`, not by Docling's parse. The inline `<font>`
+tag reads as a word boundary only during Markdown serialization; the document
+model holds the value intact, and the token stream `emit_tokens.py` produces has
+0 split amounts against 6,324 amount cells. So this gate's failure is a property
+of the export TARGET, not of the source and not of Docling. It stays failing on
+purpose: `docling.md` really does contain a silently wrong tariff, and this
+script's job is to say so about the file it was pointed at.
+
 Three of those are newer than the original version of this script, which reported
 PASS on a document where Docling corrupts a tariff amount. They exist because the
 original had three blind spots:
@@ -45,16 +54,19 @@ original had three blind spots:
 Exits non-zero when any check fails, so this is usable as a gate.
 
 WHAT THIS SCRIPT CANNOT TELL YOU. Every check here is about *content* — text,
-act codes, amounts. All of them pass on this document. The defect that actually
-blocks track B is *structural*, and Markdown is precisely the format in which it
-becomes invisible: the manual's body is one big layout `<table>`, so headings
-land inside table cells and nested `<table class="avis">` advisories flatten
-into prose. A content-conservation gate reports PASS on a document whose section
-tree has been destroyed. The SECTION IDENTITY section below is the only part
-that looks at structure, and on Markdown it can only count ATX headings — the
-cell coordinates and heading levels that carried the structure are already gone
-by the time this script sees the file. Read a PASS here as "no content was
-lost", never as "this output is usable".
+act codes, amounts. The defect that decides track B is *structural*, and Markdown
+is precisely the format in which it becomes invisible: the manual's body is one
+big layout `<table>`, so headings land inside table cells and nested
+`<table class="avis">` advisories flatten into prose. A content-conservation gate
+reports PASS on a document whose section tree has been destroyed. The SECTION
+IDENTITY section below is the only part that looks at structure, and on Markdown
+it can only count ATX headings. Read a PASS here as "no content was lost", never
+as "this output is usable".
+
+That is a verdict on the FILE, not on the converter. The structure is intact
+upstream in the `DoclingDocument`; this script simply cannot see it from a
+Markdown string. What replaced this path is `emit_tokens.py` → `../ingester/`,
+whose own gates live in `../ingester/gates.ts` and were written from this one.
 
 Usage:
     python compare_text.py [--html ../src/manuel-....html] [--md docling.md]
@@ -97,10 +109,21 @@ def markdown_text(md_path: Path) -> str:
 
     One consequence worth stating: because the manual's body is a single layout
     table, most of this document's payload arrives here as Markdown table rows.
-    That is the same data the JSON export would hold in
-    `tables[].data.table_cells[]` -- the difference is that Markdown has already
-    discarded which cell was which column, so cell-level structure cannot be
-    recovered from this string.
+    That is the same data the JSON export holds in `tables[].data.table_cells[]`.
+
+    What the difference actually is, corrected. An earlier version of this
+    docstring said Markdown "has already discarded which cell was which column,
+    so cell-level structure cannot be recovered from this string". The column
+    INDEX is in fact recoverable -- it is the position of the cell between pipes,
+    and counting it is how we know act codes sit at column 1 in 5,923 rows and
+    somewhere else in 4. What Markdown genuinely destroys is different, and
+    worse: table identity (314 merged blocks against 1,300 real tables), heading
+    nesting, inline formatting -- and, since empty cells survive as literal `| |`,
+    it adds 748 blank cells of noise in `L - Système digestif` alone.
+
+    The recoverable column index is the more dangerous loss of the two, because
+    it invites a positional reader that is right 99.93% of the time and silently
+    wrong the rest. See `../ingester/stages/type.ts`.
     """
     return md_path.read_text(encoding="utf-8", errors="replace")
 

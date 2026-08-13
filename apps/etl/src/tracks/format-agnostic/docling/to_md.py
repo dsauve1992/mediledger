@@ -11,7 +11,13 @@ table cells (`| | | ## **LÈVRES** |`), against RAMQ's 393 nav sections. Nested
 `<table class="avis">` advisories flatten into prose for the same reason.
 
 This file deliberately does the honest thing rather than the aspirational one:
-it emits what it actually emits. See the README for where that leaves track B.
+it emits what it actually emits.
+
+It is now a BASELINE, not a pipeline stage. The structure lost above is intact in
+the document model, which `to_json.py` caches and `emit_tokens.py` turns into the
+token stream the ingester reads. Keep this script: comparing the two paths is how
+we know the one corrupted amount is an artifact of Markdown serialization rather
+than of the source. See the README.
 
 Deliberately minimal otherwise: no sectioning heuristic, no tariff regex, no
 synthesized IDs.

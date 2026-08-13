@@ -17,11 +17,13 @@ apps/etl/specs.smoke-*.json
 apps/etl/specs.smoke-*.progress.json
 apps/etl/specs-normalized.json
 apps/etl/variable-registry.json
+apps/etl/act-records.json
 
 # Track B (format-agnostic): venv + derived artifacts
 __pycache__/
 apps/etl/src/tracks/format-agnostic/docling/.venv
 apps/etl/src/tracks/format-agnostic/docling/docling.md
 apps/etl/src/tracks/format-agnostic/docling/docling.doc.json
+apps/etl/src/tracks/format-agnostic/docling/tokens.jsonl
 apps/etl/src/tracks/format-agnostic/docling/docling-content.json
 apps/etl/src/tracks/format-agnostic/docling/docling-content.meta.json
